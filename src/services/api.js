@@ -1,136 +1,255 @@
 // src/services/api.js
-// Fake API implementation simulating a Node.js backend using LocalStorage
+// API real conectada ao backend Node.js em http://localhost:3000/api/v1
 
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import axios from 'axios';
 
-const getStorage = (key) => {
-  const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : [];
-};
+// =========================================================================
+// CONFIGURAÇÃO BASE DO AXIOS
+// =========================================================================
+const api = axios.create({
+  baseURL: 'http://localhost:3000/api/v1',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
-const setStorage = (key, data) => {
-  localStorage.setItem(key, JSON.stringify(data));
-};
+// Interceptor: Injeta o token JWT em todas as requisições autenticadas
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
-// Autenticação
+// Interceptor: Redireciona para login se token expirou
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Token inválido ou expirado
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      // Só redireciona se não estiver já na página de login
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+// =========================================================================
+// AUTENTICAÇÃO
+// =========================================================================
+
+/**
+ * Login — retorna { token, user: { id, name, email, role, courses } }
+ * O frontend espera { token, role }
+ */
 export const login = async (email, password) => {
-  await delay(500);
-  // Simulação básica de verificação de papel
-  if (email.includes('admin')) {
-    return { token: 'mock-jwt-token-admin', role: 'admin' };
-  } else {
-    return { token: 'mock-jwt-token-coord', role: 'coord' };
-  }
+  const { data } = await api.post('/auth/login', { email, password });
+  
+  // Salvar token e dados do usuário no localStorage
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('user', JSON.stringify(data.user));
+  
+  // Mapear role do backend para o formato do frontend
+  const roleMap = {
+    'SUPER_ADMIN': 'admin',
+    'ADMIN': 'admin',
+    'COORDINATOR': 'coord',
+    'STUDENT': 'student'
+  };
+  
+  return { 
+    token: data.token, 
+    role: roleMap[data.user.role] || 'coord',
+    user: data.user
+  };
 };
 
-// Cursos
+export const logout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+};
+
+export const getLoggedUser = () => {
+  const user = localStorage.getItem('user');
+  return user ? JSON.parse(user) : null;
+};
+
+// =========================================================================
+// CURSOS (Mapeamento: Frontend PT-BR ↔ Backend EN)
+// =========================================================================
+
+// Converte curso do backend (EN) para formato do frontend (PT-BR)
+const mapCursoFromBackend = (course) => ({
+  id: course._id,
+  nome: course.name,
+  cargaHorariaTotal: course.totalHoursRequired,
+  regras: (course.categories || []).map(cat => ({
+    id: cat._id,
+    categoria: cat.name,
+    limite: cat.maxHours
+  }))
+});
+
+/**
+ * GET /api/v1/courses → lista de cursos
+ */
 export const getCursos = async () => {
-  await delay(300);
-  return getStorage('cursos');
+  const { data } = await api.get('/courses');
+  return data.map(mapCursoFromBackend);
 };
 
+/**
+ * POST /api/v1/courses → cria curso
+ * Frontend envia: { nome, cargaHorariaTotal }
+ */
 export const createCurso = async (curso) => {
-  await delay(300);
-  const cursos = getStorage('cursos');
-  const newCurso = { ...curso, id: crypto.randomUUID(), regras: [] };
-  setStorage('cursos', [...cursos, newCurso]);
-  return newCurso;
+  const { data } = await api.post('/courses', {
+    name: curso.nome,
+    totalHoursRequired: Number(curso.cargaHorariaTotal)
+  });
+  return mapCursoFromBackend(data);
 };
 
+/**
+ * DELETE /api/v1/courses/:id → exclui curso
+ */
 export const deleteCurso = async (id) => {
-  await delay(300);
-  const cursos = getStorage('cursos');
-  setStorage('cursos', cursos.filter(c => c.id !== id));
+  await api.delete(`/courses/${id}`);
 };
 
-// Regras de Cursos
+// =========================================================================
+// REGRAS DE CURSOS (Categorias)
+// =========================================================================
+
+/**
+ * POST /api/v1/courses/:cursoId/categories → adiciona regra
+ * Frontend envia: { categoria, limite }
+ */
 export const addRegraToCurso = async (cursoId, regra) => {
-  await delay(300);
-  const cursos = getStorage('cursos');
-  const cursoIndex = cursos.findIndex(c => c.id === cursoId);
-  if (cursoIndex > -1) {
-    const newRegra = { ...regra, id: crypto.randomUUID() };
-    if (!cursos[cursoIndex].regras) cursos[cursoIndex].regras = [];
-    cursos[cursoIndex].regras.push(newRegra);
-    setStorage('cursos', cursos);
-    return newRegra;
-  }
-  throw new Error("Curso não encontrado");
+  const { data } = await api.post(`/courses/${cursoId}/categories`, {
+    name: regra.categoria,
+    maxHours: Number(regra.limite),
+    semesterMaxHours: 0
+  });
+  return {
+    id: data._id,
+    categoria: data.name,
+    limite: data.maxHours
+  };
 };
 
+/**
+ * DELETE /api/v1/courses/:cursoId/categories/:regraId → remove regra
+ */
 export const deleteRegraFromCurso = async (cursoId, regraId) => {
-  await delay(300);
-  const cursos = getStorage('cursos');
-  const cursoIndex = cursos.findIndex(c => c.id === cursoId);
-  if (cursoIndex > -1) {
-    cursos[cursoIndex].regras = cursos[cursoIndex].regras.filter(r => r.id !== regraId);
-    setStorage('cursos', cursos);
-  }
+  await api.delete(`/courses/${cursoId}/categories/${regraId}`);
 };
 
-// Coordenadores
+// =========================================================================
+// COORDENADORES (Users com role COORDINATOR)
+// =========================================================================
+
+/**
+ * GET /api/v1/users?role=COORDINATOR → lista coordenadores
+ */
 export const getCoordenadores = async () => {
-  await delay(300);
-  return getStorage('coordenadores');
+  const { data } = await api.get('/users', { params: { role: 'COORDINATOR' } });
+  return data.map(user => ({
+    id: user._id,
+    nome: user.name,
+    email: user.email,
+    cursoId: user.courses?.[0] || null
+  }));
 };
 
+/**
+ * POST /api/v1/users/register → cadastra coordenador
+ * Frontend envia: { nome, email, senha, cursoId }
+ */
 export const createCoordenador = async (coordenador) => {
-  await delay(300);
-  const coordenadores = getStorage('coordenadores');
-  const newCoord = { ...coordenador, id: crypto.randomUUID() };
-  setStorage('coordenadores', [...coordenadores, newCoord]);
-  return newCoord;
+  const { data } = await api.post('/users/register', {
+    name: coordenador.nome,
+    email: coordenador.email,
+    password: coordenador.senha,
+    role: 'COORDINATOR',
+    courses: [coordenador.cursoId]
+  });
+  return {
+    id: data.user.id,
+    nome: data.user.name,
+    email: data.user.email,
+    cursoId: data.user.courses?.[0] || null
+  };
 };
 
-// Alunos
+// =========================================================================
+// ALUNOS (Users com role STUDENT)
+// =========================================================================
+
+/**
+ * GET /api/v1/users?role=STUDENT → lista alunos
+ */
 export const getAlunos = async () => {
-  await delay(300);
-  return getStorage('alunos');
+  const { data } = await api.get('/users', { params: { role: 'STUDENT' } });
+  return data.map(user => ({
+    id: user._id,
+    nome: user.name,
+    matricula: user.matricula || '',
+    cursoId: user.courses?.[0] || null
+  }));
 };
 
+/**
+ * POST /api/v1/users/register → cadastra aluno
+ * Frontend envia: { nome, matricula, cursoId }
+ */
 export const createAluno = async (aluno) => {
-  await delay(300);
-  const alunos = getStorage('alunos');
-  const newAluno = { ...aluno, id: crypto.randomUUID() };
-  setStorage('alunos', [...alunos, newAluno]);
-  return newAluno;
+  const { data } = await api.post('/users/register', {
+    name: aluno.nome,
+    email: `${aluno.matricula}@aluno.senac.br`, // E-mail gerado a partir da matrícula
+    password: aluno.matricula, // Senha padrão = matrícula (aluno deve trocar depois)
+    role: 'STUDENT',
+    matricula: aluno.matricula,
+    courses: [aluno.cursoId]
+  });
+  return {
+    id: data.user.id,
+    nome: data.user.name,
+    matricula: data.user.matricula,
+    cursoId: data.user.courses?.[0] || null
+  };
 };
 
-// Certificados
+// =========================================================================
+// CERTIFICADOS / ATIVIDADES
+// =========================================================================
+
+/**
+ * GET /api/v1/activities?status=PENDING → certificados pendentes
+ */
 export const getCertificadosPendentes = async () => {
-  await delay(300);
-  const certs = getStorage('certificados');
-  return certs.filter(c => c.status === 'pendente');
+  const { data } = await api.get('/activities', { params: { status: 'PENDING' } });
+  return data.map(act => ({
+    id: act._id,
+    alunoNome: act.student?.name || 'Desconhecido',
+    cursoId: act.course?._id || act.course,
+    horas: act.hoursClaimed,
+    categoria: act.category,
+    status: act.status.toLowerCase(),
+    descricao: act.title
+  }));
 };
 
+/**
+ * PUT /api/v1/activities/:id/evaluate → aprovar ou reprovar
+ */
 export const avaliarCertificado = async (id, aprovado) => {
-  await delay(300);
-  const certs = getStorage('certificados');
-  const index = certs.findIndex(c => c.id === id);
-  if (index > -1) {
-    certs[index].status = aprovado ? 'aprovado' : 'reprovado';
-    setStorage('certificados', certs);
-  }
+  await api.put(`/activities/${id}/evaluate`, {
+    status: aprovado ? 'APPROVED' : 'REJECTED'
+  });
 };
-
-// Dados Mockados Iniciais para facilitar o teste
-export const initMockData = () => {
-  if (!localStorage.getItem('cursos')) {
-    const cursoId = crypto.randomUUID();
-    setStorage('cursos', [{
-      id: cursoId,
-      nome: 'Engenharia de Software',
-      cargaHorariaTotal: 300,
-      regras: [
-        { id: crypto.randomUUID(), categoria: 'Pesquisa', limite: 60 },
-        { id: crypto.randomUUID(), categoria: 'Extensão', limite: 120 }
-      ]
-    }]);
-    setStorage('certificados', [
-      { id: crypto.randomUUID(), alunoNome: 'João Silva', cursoId, horas: 30, categoria: 'Pesquisa', status: 'pendente', descricao: 'Iniciação Científica' },
-      { id: crypto.randomUUID(), alunoNome: 'Maria Souza', cursoId, horas: 10, categoria: 'Extensão', status: 'pendente', descricao: 'Semana de TI' }
-    ]);
-  }
-};
-
-initMockData();

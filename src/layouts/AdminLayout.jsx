@@ -1,10 +1,17 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Settings, Users, BookOpen, LogOut } from 'lucide-react';
+import { logout } from '../services/api';
 
 export default function AdminLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path) => location.pathname.includes(path) ? 'active' : '';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <div className="dashboard-layout">
@@ -18,9 +25,9 @@ export default function AdminLayout() {
             <Users size={20} /> Coordenadores
           </Link>
         </nav>
-        <Link to="/login" className="nav-item text-danger mt-4" style={{ color: 'var(--danger)' }}>
+        <button onClick={handleLogout} className="nav-item" style={{ color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', fontSize: 'inherit' }}>
           <LogOut size={20} /> Sair
-        </Link>
+        </button>
       </aside>
       <main className="main-content">
         <Outlet />

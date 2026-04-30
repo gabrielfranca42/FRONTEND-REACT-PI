@@ -16,7 +16,6 @@ export default function Login() {
     setLoading(true);
     
     try {
-      // Chamada para a API (por enquanto simulada)
       const response = await login(email, password);
       
       if (response.role === 'admin') {
@@ -25,7 +24,8 @@ export default function Login() {
         navigate('/coordinator');
       }
     } catch (err) {
-      setError('E-mail ou senha inválidos.');
+      const msg = err.response?.data?.error || 'E-mail ou senha inválidos.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -73,9 +73,6 @@ export default function Login() {
             <LogIn size={20} /> {loading ? 'Entrando...' : 'Entrar no Sistema'}
           </button>
         </form>
-        <p className="mt-4 text-center" style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-          * Dica: Digite "admin" no e-mail para acessar como Administrador, ou qualquer outro para Coordenador.
-        </p>
       </div>
     </div>
   );

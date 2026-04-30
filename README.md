@@ -1,16 +1,91 @@
-# React + Vite
+# SIGAC — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface web do Sistema Integrado de Gestão de Atividades Complementares (SIGAC).
 
-Currently, two official plugins are available:
+## Tecnologias
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Framework:** React 19
+- **Build Tool:** Vite 8
+- **Roteamento:** React Router DOM 7
+- **HTTP Client:** Axios
+- **Ícones:** Lucide React
+- **Estilização:** CSS puro (Vanilla CSS)
 
-## React Compiler
+## Pré-requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 18+
+- Backend rodando em `http://localhost:3000` (ver repositório do backend)
 
-## Expanding the ESLint configuration
+## Instalação
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+```
+
+## Executar
+
+```bash
+npm run dev
+```
+
+A aplicação roda em `http://localhost:5173`
+
+## Conexão com o Backend
+
+O frontend se conecta ao backend via API REST. A URL base está configurada em `src/services/api.js`:
+
+```
+http://localhost:3000/api/v1
+```
+
+A autenticação usa JWT (Bearer Token) armazenado no `localStorage`.
+
+## Funcionalidades
+
+### Painel Administrativo (`/admin`)
+- **Gestão de Cursos** — CRUD completo de cursos
+- **Regras de Cursos** — Adicionar/remover categorias e limites de horas por curso
+- **Gestão de Coordenadores** — Cadastro de coordenadores vinculados a cursos
+
+### Painel do Coordenador (`/coordinator`)
+- **Dashboard de Pendências** — Visualizar e avaliar certificados/atividades pendentes
+- **Gestão de Alunos** — Cadastro de alunos vinculados a cursos
+
+## Estrutura do Projeto
+
+```
+src/
+├── layouts/
+│   ├── AdminLayout.jsx         # Layout com sidebar do admin
+│   └── CoordinatorLayout.jsx   # Layout com sidebar do coordenador
+├── pages/
+│   ├── Login.jsx               # Tela de login
+│   ├── admin/
+│   │   ├── CursosCRUD.jsx      # CRUD de cursos
+│   │   ├── RegrasCurso.jsx     # Regras/categorias por curso
+│   │   └── CoordenadoresCRUD.jsx # CRUD de coordenadores
+│   └── coordinator/
+│       ├── CoordDashboard.jsx  # Avaliação de atividades
+│       └── AlunosCRUD.jsx      # CRUD de alunos
+├── services/
+│   └── api.js                  # Chamadas HTTP ao backend (Axios)
+├── App.jsx                     # Rotas da aplicação
+├── App.css
+├── index.css                   # Design system / variáveis CSS
+└── main.jsx                    # Ponto de entrada React
+```
+
+## Rotas
+
+| Rota | Componente | Acesso |
+|---|---|---|
+| `/login` | Login | Público |
+| `/admin/cursos` | CursosCRUD | Admin |
+| `/admin/cursos/:id/regras` | RegrasCurso | Admin |
+| `/admin/coordenadores` | CoordenadoresCRUD | Admin |
+| `/coordinator` | CoordDashboard | Coordenador |
+| `/coordinator/alunos` | AlunosCRUD | Coordenador |
+
+## Backend
+
+O backend Node.js está em um repositório separado: [PROJETO-SENAC-GERALDO](https://github.com/gabrielfranca42/PROJETO-SENAC-GERALDO)
