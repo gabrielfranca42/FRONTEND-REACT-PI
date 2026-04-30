@@ -48,6 +48,44 @@ api.interceptors.response.use(
  * O frontend espera { token, role }
  */
 export const login = async (email, password) => {
+  // ==========================================
+  // MOCK DE TESTE (BURLA O BACKEND/BANCO DE DADOS)
+  // ==========================================
+  if (email === 'teste4222@gmail.com' && password === '1234') {
+    const mockUser = {
+      id: 'mock-id-123',
+      name: 'Administrador de Teste',
+      email: 'teste4222@gmail.com',
+      role: 'SUPER_ADMIN',
+      courses: []
+    };
+    localStorage.setItem('token', 'mock-jwt-token-123');
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    return {
+      token: 'mock-jwt-token-123',
+      role: 'admin',
+      user: mockUser
+    };
+  }
+
+  if (email === 'co@gmail.com' && password === '1234') {
+    const mockUser = {
+      id: 'mock-coord-123',
+      name: 'Coordenador de Teste',
+      email: 'co@gmail.com',
+      role: 'COORDINATOR',
+      courses: ['curso-teste-123']
+    };
+    localStorage.setItem('token', 'mock-jwt-token-coord');
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    return {
+      token: 'mock-jwt-token-coord',
+      role: 'coord',
+      user: mockUser
+    };
+  }
+  // ==========================================
+
   const { data } = await api.post('/auth/login', { email, password });
   
   // Salvar token e dados do usuário no localStorage
