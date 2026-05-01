@@ -1,20 +1,34 @@
 import { useState, useEffect } from 'react';
-import { getCertificadosPendentes, avaliarCertificado, getCursos } from '../../services/api';
-import { Check, X } from 'lucide-react';
+import { getCertificadosPendentes, avaliarCertificado, getCursos, getLoggedUser, getAlunos } from '../../services/api';
+import { Check, X, Users, FileCheck, BookOpen } from 'lucide-react';
 
 export default function CoordDashboard() {
   const [pendencias, setPendencias] = useState([]);
   const [cursos, setCursos] = useState([]);
+  const [meusCursos, setMeusCursos] = useState([]);
+  const [totalAlunos, setTotalAlunos] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
     setLoading(true);
-    const [certData, cursosData] = await Promise.all([
+    const user = getLoggedUser();
+    const myCourseIds = user?.courses || [];
+
+    const [certData, cursosData, alunosData] = await Promise.all([
       getCertificadosPendentes(),
-      getCursos()
+      getCursos(),
+      getAlunos()
     ]);
-    setPendencias(certData);
+
+    // Filtrar os dados apenas para os cursos do coordenador logado
+    const filteredCursos = cursosData.filter(c => myCourseIds.includes(c.id));
+    const filteredAlunos = alunosData.filter(a => myCourseIds.includes(a.cursoId));
+    const filteredPendencias = certData.filter(cert => myCourseIds.includes(cert.cursoId));
+
     setCursos(cursosData);
+    setMeusCursos(filteredCursos);
+    setTotalAlunos(filteredAlunos.length);
+    setPendencias(filteredPendencias);
     setLoading(false);
   };
 
@@ -36,6 +50,40 @@ export default function CoordDashboard() {
         <h1>Painel do Coordenador</h1>
       </div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+          <div style={{ backgroundColor: 'var(--primary)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
+            <BookOpen size={32} />
+          </div>
+          <div>
+            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Seus Cursos</h3>
+            <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold' }}>
+              {meusCursos.length > 0 ? meusCursos.map(c => c.nome).join(', ') : 'Nenhum curso vinculado'}
+            </p>
+          </div>
+        </div>
+
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+          <div style={{ backgroundColor: 'var(--accent)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
+            <Users size={32} />
+          </div>
+          <div>
+            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total de Alunos</h3>
+            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{totalAlunos}</p>
+          </div>
+        </div>
+
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+          <div style={{ backgroundColor: 'var(--warning)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
+            <FileCheck size={32} />
+          </div>
+          <div>
+            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pendências do Curso</h3>
+            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{pendencias.length}</p>
+          </div>
+        </div>
+      </div>
+
       <div className="card">
         <h3 className="mb-4">Certificados Pendentes de Avaliação</h3>
         {loading ? (
@@ -43,7 +91,7 @@ export default function CoordDashboard() {
         ) : pendencias.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
             <Check size={48} style={{ margin: '0 auto', color: 'var(--secondary)' }} />
-            <p className="mt-4">Tudo em dia! Nenhum certificado pendente.</p>
+            <p className="mt-4">Tudo em dia! Nenhum certificado pendente no seu curso.</p>
           </div>
         ) : (
           <div className="table-responsive">

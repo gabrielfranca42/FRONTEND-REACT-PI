@@ -4,6 +4,7 @@ import CoordinatorLayout from './layouts/CoordinatorLayout';
 import Login from './pages/Login';
 
 // Admin Pages
+import AdminDashboard from './pages/admin/AdminDashboard';
 import CursosCRUD from './pages/admin/CursosCRUD';
 import RegrasCurso from './pages/admin/RegrasCurso';
 import CoordenadoresCRUD from './pages/admin/CoordenadoresCRUD';
@@ -21,7 +22,7 @@ function App() {
         
         {/* Rotas de Administrador */}
         <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="/admin/cursos" replace />} />
+          <Route index element={<AdminDashboard />} />
           <Route path="cursos" element={<CursosCRUD />} />
           <Route path="cursos/:id/regras" element={<RegrasCurso />} />
           <Route path="coordenadores" element={<CoordenadoresCRUD />} />

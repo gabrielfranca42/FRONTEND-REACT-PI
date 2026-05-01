@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { FileText, Users, LogOut, CheckCircle } from 'lucide-react';
+import { FileText, Users, LogOut, CheckCircle, LayoutDashboard } from 'lucide-react';
 import { logout } from '../services/api';
 
 export default function CoordinatorLayout() {
@@ -23,7 +23,7 @@ export default function CoordinatorLayout() {
         <h2><CheckCircle size={24} /> Coordenador</h2>
         <nav className="nav-menu" style={{ flex: 1 }}>
           <Link to="/coordinator" className={`nav-item ${isActive('/coordinator')}`}>
-            <FileText size={20} /> Pendências
+            <LayoutDashboard size={20} /> Dashboard
           </Link>
           <Link to="/coordinator/alunos" className={`nav-item ${isActive('/coordinator/alunos')}`}>
             <Users size={20} /> Alunos

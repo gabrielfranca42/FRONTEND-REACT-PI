@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Settings, Users, BookOpen, LogOut } from 'lucide-react';
+import { Settings, Users, BookOpen, LogOut, LayoutDashboard } from 'lucide-react';
 import { logout } from '../services/api';
 
 export default function AdminLayout() {
@@ -18,6 +18,9 @@ export default function AdminLayout() {
       <aside className="sidebar">
         <h2><Settings size={24} /> Admin Panel</h2>
         <nav className="nav-menu" style={{ flex: 1 }}>
+          <Link to="/admin" className={`nav-item ${isActive('/admin') && !isActive('/admin/') ? 'active' : ''}`} style={location.pathname === '/admin' ? { backgroundColor: 'var(--primary)', color: 'white' } : {}}>
+            <LayoutDashboard size={20} /> Dashboard
+          </Link>
           <Link to="/admin/cursos" className={`nav-item ${isActive('/admin/cursos')}`}>
             <BookOpen size={20} /> Cursos
           </Link>
