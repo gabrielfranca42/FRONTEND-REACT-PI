@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getCursos, getCoordenadores, getAlunos, getCertificadosPendentes } from '../../services/api';
 import { BookOpen, Users, GraduationCap, FileCheck } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 export default function AdminDashboard() {
   const [metrics, setMetrics] = useState({
@@ -9,6 +12,8 @@ export default function AdminDashboard() {
     alunos: 0,
     certificados: 0
   });
+  const [chartData, setChartData] = useState([]);
+  const [pieData, setPieData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,6 +33,29 @@ export default function AdminDashboard() {
           alunos: alunosData.length,
           certificados: certData.length
         });
+
+        // Preparar dados para o gráfico de barras (Alunos por Curso)
+        const alunosPorCurso = cursosData.map(curso => {
+          const count = alunosData.filter(a => a.cursoId === curso.id).length;
+          return {
+            nome: curso.nome.length > 15 ? curso.nome.substring(0, 15) + '...' : curso.nome,
+            Alunos: count
+          };
+        });
+        setChartData(alunosPorCurso);
+
+        // Preparar dados para o gráfico de pizza (Pendências por Categoria)
+        const certsPorCategoria = certData.reduce((acc, cert) => {
+          acc[cert.categoria] = (acc[cert.categoria] || 0) + 1;
+          return acc;
+        }, {});
+        
+        const pieDataFormat = Object.keys(certsPorCategoria).map(key => ({
+          name: key,
+          value: certsPorCategoria[key]
+        }));
+        setPieData(pieDataFormat);
+
       } catch (error) {
         console.error("Erro ao carregar métricas:", error);
       } finally {
@@ -90,12 +118,59 @@ export default function AdminDashboard() {
         </div>
       </div>
       
-      <div className="card">
-        <h3>Bem-vindo ao Painel do Administrador</h3>
-        <p className="mt-4" style={{ color: 'var(--text-muted)' }}>
-          Utilize o menu lateral para gerenciar os cursos, regras e os coordenadores do sistema. 
-          As métricas acima refletem o estado atual de todo o sistema em tempo real.
-        </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div className="card">
+          <h3 className="mb-4">Alunos por Curso</h3>
+          <div style={{ width: '100%', height: 300 }}>
+            {chartData.length > 0 ? (
+              <ResponsiveContainer>
+                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
+                  <XAxis dataKey="nome" tick={{fontSize: 12}} />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip cursor={{fill: 'transparent'}} />
+                  <Bar dataKey="Alunos" fill="var(--primary)" radius={[4, 4, 0, 0]} barSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                Nenhum dado disponível
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="mb-4">Pendências por Categoria</h3>
+          <div style={{ width: '100%', height: 300 }}>
+            {pieData.length > 0 ? (
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                Nenhuma pendência no momento
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

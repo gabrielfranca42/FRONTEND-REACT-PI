@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { getCertificadosPendentes, avaliarCertificado, getCursos, getLoggedUser, getAlunos } from '../../services/api';
 import { Check, X, Users, FileCheck, BookOpen } from 'lucide-react';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 export default function CoordDashboard() {
   const [pendencias, setPendencias] = useState([]);
   const [cursos, setCursos] = useState([]);
   const [meusCursos, setMeusCursos] = useState([]);
   const [totalAlunos, setTotalAlunos] = useState(0);
+  const [pieData, setPieData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
@@ -25,10 +29,22 @@ export default function CoordDashboard() {
     const filteredAlunos = alunosData.filter(a => myCourseIds.includes(a.cursoId));
     const filteredPendencias = certData.filter(cert => myCourseIds.includes(cert.cursoId));
 
+    // Preparar dados para o gráfico de pizza
+    const certsPorCategoria = filteredPendencias.reduce((acc, cert) => {
+      acc[cert.categoria] = (acc[cert.categoria] || 0) + 1;
+      return acc;
+    }, {});
+    
+    const pieDataFormat = Object.keys(certsPorCategoria).map(key => ({
+      name: key,
+      value: certsPorCategoria[key]
+    }));
+
     setCursos(cursosData);
     setMeusCursos(filteredCursos);
     setTotalAlunos(filteredAlunos.length);
     setPendencias(filteredPendencias);
+    setPieData(pieDataFormat);
     setLoading(false);
   };
 
@@ -83,6 +99,34 @@ export default function CoordDashboard() {
           </div>
         </div>
       </div>
+
+      {pieData.length > 0 && (
+        <div className="card mb-6">
+          <h3 className="mb-4">Pendências por Categoria</h3>
+          <div style={{ width: '100%', height: 300 }}>
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <h3 className="mb-4">Certificados Pendentes de Avaliação</h3>
