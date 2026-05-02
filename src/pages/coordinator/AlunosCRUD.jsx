@@ -13,17 +13,33 @@ export default function AlunosCRUD() {
 
   const loadData = async () => {
     const activeCourseId = localStorage.getItem('activeCourseId');
-    if (!activeCourseId) return;
+    if (!activeCourseId) {
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
-    const [alunosData, cursosData] = await Promise.all([
-      getAlunos(activeCourseId),
-      getCursos()
-    ]);
-    setAlunos(alunosData);
-    setCursos(cursosData.filter(c => c.id === activeCourseId));
-    setCursoId(activeCourseId); // Pré-seleciona o curso ativo
-    setLoading(false);
+    try {
+      const [alunosData, cursosData] = await Promise.all([
+        getAlunos(activeCourseId),
+        getCursos()
+      ]);
+      
+      setAlunos(alunosData);
+      
+      // Filtrar o curso atual para exibir no formulário
+      const cursoAtual = cursosData.find(c => c.id === activeCourseId);
+      if (cursoAtual) {
+        setCursos([cursoAtual]);
+        setCursoId(activeCourseId);
+      } else {
+        setCursos([]);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar alunos:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

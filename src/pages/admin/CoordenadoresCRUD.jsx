@@ -120,12 +120,12 @@ export default function CoordenadoresCRUD() {
       <div className="card mb-6">
         <h3 className="mb-4">{editingId ? 'Editar Coordenador' : 'Novo Coordenador'}</h3>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="flex gap-4 flex-wrap">
-            <div className="form-group" style={{ flex: '1 1 250px' }}>
+          <div className="flex gap-4 flex-wrap items-end">
+            <div className="form-group" style={{ flex: '1 1 200px' }}>
               <label>Nome Completo</label>
               <input required type="text" className="form-control" value={nome} onChange={(e) => setNome(e.target.value)} />
             </div>
-            <div className="form-group" style={{ flex: '1 1 250px' }}>
+            <div className="form-group" style={{ flex: '1 1 200px' }}>
               <label>E-mail</label>
               <input required type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
@@ -135,15 +135,27 @@ export default function CoordenadoresCRUD() {
                 <input required type="password" className="form-control" value={senha} onChange={(e) => setSenha(e.target.value)} />
               </div>
             )}
+            <div className="flex gap-3" style={{ marginBottom: '1rem' }}>
+              <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', height: '42px', alignSelf: 'flex-end' }}>
+                {editingId ? <Edit2 size={18} /> : <Plus size={18} />}
+                {editingId ? 'Salvar' : 'Criar Coordenador'}
+              </button>
+              {editingId && (
+                <button type="button" className="btn" onClick={resetForm} style={{ backgroundColor: 'var(--border)', height: '42px', alignSelf: 'flex-end' }}>
+                  Cancelar
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="form-group">
             <label className="mb-2 block">Cursos Responsáveis (Selecione um ou mais)</label>
             <div className="flex gap-2 flex-wrap" style={{ 
               background: 'var(--bg-light)', 
-              padding: '1rem', 
+              padding: '0.75rem', 
               borderRadius: '8px',
-              border: '1px solid var(--border)'
+              border: '1px solid var(--border)',
+              minHeight: '50px'
             }}>
               {cursos.map(curso => (
                 <button
@@ -151,14 +163,14 @@ export default function CoordenadoresCRUD() {
                   type="button"
                   onClick={() => toggleCourse(curso.id)}
                   style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '20px',
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '16px',
                     border: '1px solid',
                     borderColor: selectedCourses.includes(curso.id) ? 'var(--primary)' : 'var(--border)',
                     backgroundColor: selectedCourses.includes(curso.id) ? 'var(--primary)' : 'white',
                     color: selectedCourses.includes(curso.id) ? 'white' : 'var(--text-main)',
                     cursor: 'pointer',
-                    fontSize: '0.875rem',
+                    fontSize: '0.8rem',
                     transition: 'all 0.2s'
                   }}
                 >
@@ -166,18 +178,6 @@ export default function CoordenadoresCRUD() {
                 </button>
               ))}
             </div>
-          </div>
-
-          <div className="flex gap-3">
-            <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {editingId ? <Edit2 size={18} /> : <Plus size={18} />}
-              {editingId ? 'Salvar Alterações' : 'Criar Coordenador'}
-            </button>
-            {editingId && (
-              <button type="button" className="btn" onClick={resetForm} style={{ backgroundColor: 'var(--border)' }}>
-                Cancelar
-              </button>
-            )}
           </div>
         </form>
       </div>
