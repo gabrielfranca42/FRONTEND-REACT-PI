@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 export default function AlunosCRUD() {
   const [alunos, setAlunos] = useState([]);
   const [cursos, setCursos] = useState([]);
-  
+
   const [nome, setNome] = useState('');
   const [matricula, setMatricula] = useState('');
   const [cursoId, setCursoId] = useState('');
@@ -31,9 +31,9 @@ export default function AlunosCRUD() {
         getAlunos(activeCourseId),
         getCursos()
       ]);
-      
+
       setAlunos(alunosData);
-      
+
       // Filtrar o curso atual para exibir no formulário
       const cursoAtual = cursosData.find(c => String(c.id) === String(activeCourseId));
       if (cursoAtual) {
@@ -54,7 +54,7 @@ export default function AlunosCRUD() {
 
     const handleCourseChanged = () => loadData();
     window.addEventListener('courseChanged', handleCourseChanged);
-    
+
     return () => window.removeEventListener('courseChanged', handleCourseChanged);
   }, []);
 
@@ -62,7 +62,7 @@ export default function AlunosCRUD() {
     e.preventDefault();
     const activeCourseId = localStorage.getItem('activeCourseId');
     if (!nome || !matricula || !activeCourseId) return;
-    
+
     await createAluno({ nome, matricula, cursoId: activeCourseId });
     setNome('');
     setMatricula('');

@@ -72,142 +72,159 @@ export default function CoordDashboard() {
   };
 
   return (
-    <div>
+    <div className="dashboard-container">
       <div className="flex justify-between items-center mb-6">
-        <h1>Painel do Coordenador {cursoAtivo && <span style={{ color: 'var(--primary)', fontSize: '1.5rem' }}>| {cursoAtivo.nome}</span>}</h1>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
-          <div style={{ backgroundColor: 'var(--primary)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
-            <Users size={32} />
-          </div>
-          <div>
-            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Alunos</h3>
-            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.totalAlunos}</p>
-          </div>
-        </div>
-
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
-          <div style={{ backgroundColor: 'var(--warning)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
-            <Clock size={32} />
-          </div>
-          <div>
-            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pendentes</h3>
-            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.pendentes}</p>
-          </div>
-        </div>
-
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
-          <div style={{ backgroundColor: 'var(--secondary)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
-            <Check size={32} />
-          </div>
-          <div>
-            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aprovadas</h3>
-            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.aprovadas}</p>
-          </div>
-        </div>
-
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
-          <div style={{ backgroundColor: 'var(--accent)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
-            <FileCheck size={32} />
-          </div>
-          <div>
-            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Horas</h3>
-            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.totalHorasAprovadas}h</p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold">Painel do Coordenador</h1>
+          {cursoAtivo && (
+            <div className="flex items-center gap-2 text-primary font-semibold mt-1">
+              <BookOpen size={18} />
+              <span>{cursoAtivo.nome}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {pieData.length > 0 && (
-        <div className="card mb-6">
-          <h3 className="mb-4">Pendências por Categoria</h3>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <p>Carregando dados do curso...</p>
         </div>
-      )}
+      ) : (
+        <>
+          {/* Cards de Estatísticas */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+            <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+              <div style={{ backgroundColor: 'var(--primary)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
+                <Users size={32} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Total Alunos</h3>
+                <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.totalAlunos}</p>
+              </div>
+            </div>
 
-      <div className="card">
-        <h3 className="mb-4">Certificados Pendentes de Avaliação</h3>
-        {loading ? (
-          <p>Carregando pendências...</p>
-        ) : pendencias.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-            <Check size={48} style={{ margin: '0 auto', color: 'var(--secondary)' }} />
-            <p className="mt-4">Tudo em dia! Nenhum certificado pendente no seu curso.</p>
+            <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+              <div style={{ backgroundColor: 'var(--warning)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
+                <Clock size={32} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Pendentes</h3>
+                <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.pendentes}</p>
+              </div>
+            </div>
+
+            <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+              <div style={{ backgroundColor: 'var(--secondary)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
+                <Check size={32} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Aprovadas</h3>
+                <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.aprovadas}</p>
+              </div>
+            </div>
+
+            <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+              <div style={{ backgroundColor: 'var(--accent)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
+                <FileCheck size={32} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Horas Totais</h3>
+                <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.totalHorasAprovadas}h</p>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="table-responsive">
-            <table>
-              <thead>
-                <tr>
-                  <th>Aluno</th>
-                  <th>Curso</th>
-                  <th>Categoria / Descrição</th>
-                  <th>Horas Solicitadas</th>
-                  <th>Ação</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendencias.map(cert => {
-                  const curso = cursos.find(c => c.id === cert.cursoId);
-                  return (
-                    <tr key={cert.id}>
-                      <td>{cert.alunoNome}</td>
-                      <td>{curso ? curso.nome : 'Curso não encontrado'}</td>
-                      <td>
-                        <strong>{cert.categoria}</strong><br />
-                        <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{cert.descricao}</span>
-                      </td>
-                      <td>{cert.horas}h</td>
-                      <td>
-                        <div className="flex gap-2">
-                          <button 
-                            className="btn btn-secondary" 
-                            style={{ backgroundColor: 'var(--secondary)', color: 'white', padding: '0.5rem' }}
-                            onClick={() => handleAvaliacao(cert.id, true)}
-                            title="Aprovar"
-                          >
-                            <Check size={18} />
-                          </button>
-                          <button 
-                            className="btn btn-danger" 
-                            style={{ padding: '0.5rem' }}
-                            onClick={() => handleAvaliacao(cert.id, false)}
-                            title="Reprovar"
-                          >
-                            <X size={18} />
-                          </button>
-                        </div>
-                      </td>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+            {/* Gráfico de Categorias */}
+            <div className="card">
+              <h3 className="mb-6">Pendências por Categoria</h3>
+              <div style={{ height: '300px', width: '100%' }}>
+                {pieData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex justify-center items-center h-full text-muted">
+                    Nenhuma pendência para este curso.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <h3 className="mb-4">Certificados Pendentes de Avaliação</h3>
+            {pendencias.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                <Check size={48} style={{ margin: '0 auto', color: 'var(--secondary)' }} />
+                <p className="mt-4">Tudo em dia! Nenhum certificado pendente no seu curso.</p>
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Aluno</th>
+                      <th>Categoria / Descrição</th>
+                      <th>Horas Solicitadas</th>
+                      <th>Ação</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {pendencias.map(cert => (
+                      <tr key={cert.id}>
+                        <td>{cert.alunoNome}</td>
+                        <td>
+                          <strong>{cert.categoria}</strong><br />
+                          <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{cert.descricao}</span>
+                        </td>
+                        <td>{cert.horas}h</td>
+                        <td>
+                          <div className="flex gap-2">
+                            <button 
+                              className="btn btn-secondary" 
+                              style={{ backgroundColor: 'var(--secondary)', color: 'white', padding: '0.5rem' }}
+                              onClick={() => handleAvaliacao(cert.id, true)}
+                              title="Aprovar"
+                            >
+                              <Check size={18} />
+                            </button>
+                            <button 
+                              className="btn btn-danger" 
+                              style={{ padding: '0.5rem' }}
+                              onClick={() => handleAvaliacao(cert.id, false)}
+                              title="Reprovar"
+                            >
+                              <X size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
