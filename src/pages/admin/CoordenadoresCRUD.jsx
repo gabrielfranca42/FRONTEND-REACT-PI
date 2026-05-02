@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getCoordenadores, createCoordenador, updateCoordenador, deleteCoordenador, getCursos } from '../../services/api';
-import { Plus, Edit2, Trash2, XCircle, CheckCircle } from 'lucide-react';
+import { getCoordenadores, createCoordenador, updateCoordenador, deleteCoordenador, getCursos, createCurso } from '../../services/api';
+import { Plus, Edit2, Trash2, XCircle, CheckCircle, Sparkles } from 'lucide-react';
 
 export default function CoordenadoresCRUD() {
   const [coordenadores, setCoordenadores] = useState([]);
@@ -12,6 +12,7 @@ export default function CoordenadoresCRUD() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [selectedCourses, setSelectedCourses] = useState([]);
+  const [novoCurso, setNovoCurso] = useState('');
   
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -42,6 +43,7 @@ export default function CoordenadoresCRUD() {
     setEmail('');
     setSenha('');
     setSelectedCourses([]);
+    setNovoCurso('');
   };
 
   const showMsg = (text, type = 'success') => {
@@ -62,11 +64,22 @@ export default function CoordenadoresCRUD() {
     if (!nome || !email || (!editingId && !senha)) return;
     
     try {
+      let finalCourseIds = [...selectedCourses];
+
+      // Se houver um novo curso digitado, cria ele primeiro
+      if (novoCurso.trim()) {
+        const cursoCriado = await createCurso({ 
+          nome: novoCurso.trim(), 
+          cargaHorariaTotal: 300 // Valor padrão inicial
+        });
+        finalCourseIds.push(cursoCriado.id);
+      }
+
       if (editingId) {
-        await updateCoordenador(editingId, { nome, email, courses: selectedCourses });
+        await updateCoordenador(editingId, { nome, email, courses: finalCourseIds });
         showMsg('Coordenador atualizado com sucesso!');
       } else {
-        await createCoordenador({ nome, email, senha, courses: selectedCourses });
+        await createCoordenador({ nome, email, senha, courses: finalCourseIds });
         showMsg('Coordenador criado com sucesso!');
       }
       resetForm();
@@ -82,6 +95,7 @@ export default function CoordenadoresCRUD() {
     setEmail(coord.email);
     setSenha(''); // Não editamos senha por aqui
     setSelectedCourses(coord.courses || []);
+    setNovoCurso('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -135,6 +149,19 @@ export default function CoordenadoresCRUD() {
                 <input required type="password" className="form-control" value={senha} onChange={(e) => setSenha(e.target.value)} />
               </div>
             )}
+            <div className="form-group" style={{ flex: '1 1 200px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                Novo Curso <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>(Opcional)</span>
+                <Sparkles size={14} className="text-warning" />
+              </label>
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="Ex: Enfermagem" 
+                value={novoCurso} 
+                onChange={(e) => setNovoCurso(e.target.value)} 
+              />
+            </div>
             <div className="flex gap-3" style={{ marginBottom: '1rem' }}>
               <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', height: '42px', alignSelf: 'flex-end' }}>
                 {editingId ? <Edit2 size={18} /> : <Plus size={18} />}
@@ -149,7 +176,7 @@ export default function CoordenadoresCRUD() {
           </div>
 
           <div className="form-group">
-            <label className="mb-2 block">Cursos Responsáveis (Selecione um ou mais)</label>
+            <label className="mb-2 block">Cursos Responsáveis (Selecione os existentes abaixo)</label>
             <div className="flex gap-2 flex-wrap" style={{ 
               background: 'var(--bg-light)', 
               padding: '0.75rem', 
@@ -177,6 +204,7 @@ export default function CoordenadoresCRUD() {
                   {curso.nome}
                 </button>
               ))}
+              {cursos.length === 0 && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Nenhum curso cadastrado ainda.</p>}
             </div>
           </div>
         </form>
