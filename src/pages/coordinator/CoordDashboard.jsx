@@ -138,7 +138,7 @@ export default function CoordDashboard() {
             {/* Gráfico de Categorias */}
             <div className="card">
               <h3 className="mb-6">Pendências por Categoria</h3>
-              <div style={{ height: '300px', width: '100%' }}>
+              <div style={{ height: '300px', width: '100%', minWidth: '0' }}>
                 {pieData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>

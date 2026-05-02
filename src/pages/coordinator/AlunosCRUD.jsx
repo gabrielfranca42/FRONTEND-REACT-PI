@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAlunos, createAluno, getCursos } from '../../services/api';
+import { getAlunos, createAluno, getCursos, getLoggedUser } from '../../services/api';
 import { Plus } from 'lucide-react';
 
 export default function AlunosCRUD() {

@@ -121,9 +121,9 @@ export default function AdminDashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         <div className="card">
           <h3 className="mb-4">Alunos por Curso</h3>
-          <div style={{ width: '100%', height: 300 }}>
+          <div style={{ width: '100%', height: 300, minWidth: 0 }}>
             {chartData.length > 0 ? (
-              <ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
                   <XAxis dataKey="nome" tick={{fontSize: 12}} />
@@ -142,9 +142,9 @@ export default function AdminDashboard() {
 
         <div className="card">
           <h3 className="mb-4">Pendências por Categoria</h3>
-          <div style={{ width: '100%', height: 300 }}>
+          <div style={{ width: '100%', height: 300, minWidth: 0 }}>
             {pieData.length > 0 ? (
-              <ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={pieData}
