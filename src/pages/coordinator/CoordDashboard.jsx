@@ -212,7 +212,13 @@ export default function CoordDashboard() {
                             <button 
                               className="btn" 
                               style={{ backgroundColor: 'var(--info)', color: 'white', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
-                              onClick={() => window.open(cert.certificateUrl, '_blank')}
+                              onClick={() => {
+                                if (!cert.certificateUrl || cert.certificateUrl.includes('example.com')) {
+                                  alert('Este certificado não possui um arquivo anexo para visualização.');
+                                } else {
+                                  window.open(cert.certificateUrl, '_blank');
+                                }
+                              }}
                               title="Averiguar (Visualizar PDF)"
                             >
                               <Eye size={16} /> Averiguar

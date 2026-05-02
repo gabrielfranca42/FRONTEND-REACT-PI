@@ -295,7 +295,15 @@ export default function AlunosCRUD() {
                         </td>
                         <td>
                           <div className="flex gap-2">
-                            <button onClick={() => window.open(h.certificateUrl, '_blank')} title="Ver PDF" style={{ padding: '0.3rem' }}><Eye size={16} /></button>
+                            <button onClick={() => {
+                              if (!h.certificateUrl || h.certificateUrl.includes('example.com')) {
+                                alert('Este certificado não possui um arquivo anexo para visualização.');
+                              } else {
+                                window.open(h.certificateUrl, '_blank');
+                              }
+                            }} title="Ver PDF" style={{ padding: '0.3rem' }}>
+                              <Eye size={16} />
+                            </button>
                             <button onClick={() => handleAdjustHours(h.id)} title="Editar Horas" style={{ padding: '0.3rem', color: 'var(--primary)' }}><Edit3 size={16} /></button>
                           </div>
                         </td>
