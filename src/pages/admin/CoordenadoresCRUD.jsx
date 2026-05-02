@@ -122,17 +122,34 @@ export default function CoordenadoresCRUD() {
         <h3 className="mb-4">{editingId ? 'Editar Coordenador' : 'Novo Coordenador'}</h3>
         <form onSubmit={handleSubmit} style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+          gridTemplateColumns: 'repeat(3, 1fr)', 
           gap: '1.5rem',
           alignItems: 'start'
         }}>
-          {/* Coluna 1: Nome e Vínculo */}
-          <div className="flex flex-col gap-4">
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label>Nome Completo</label>
-              <input required type="text" className="form-control" value={nome} onChange={(e) => setNome(e.target.value)} />
-            </div>
+          {/* Linha 1 */}
+          <div className="form-group">
+            <label>Nome Completo</label>
+            <input required type="text" className="form-control" value={nome} onChange={(e) => setNome(e.target.value)} />
+          </div>
 
+          <div className="form-group">
+            <label>E-mail</label>
+            <input required type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+
+          <div className="form-group">
+            {!editingId ? (
+              <>
+                <label>Senha</label>
+                <input required type="password" className="form-control" value={senha} onChange={(e) => setSenha(e.target.value)} />
+              </>
+            ) : (
+              <div style={{ height: '1px' }}></div>
+            )}
+          </div>
+
+          {/* Linha 2 */}
+          <div className="flex flex-col gap-2">
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label>Vincular Cursos</label>
               <select
@@ -157,7 +174,6 @@ export default function CoordenadoresCRUD() {
                 ))}
               </select>
             </div>
-
             {/* Tags abaixo do seletor */}
             <div className="flex gap-2 flex-wrap" style={{ minHeight: '30px' }}>
               {selectedCourses.map(cId => {
@@ -185,22 +201,10 @@ export default function CoordenadoresCRUD() {
             </div>
           </div>
 
-          {/* Coluna 2: E-mail */}
-          <div className="form-group">
-            <label>E-mail</label>
-            <input required type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </div>
+          <div>{/* Espaço sob o E-mail */}</div>
 
-          {/* Coluna 3: Senha e Botão */}
-          <div className="flex flex-col gap-4">
-            {!editingId && (
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label>Senha</label>
-                <input required type="password" className="form-control" value={senha} onChange={(e) => setSenha(e.target.value)} />
-              </div>
-            )}
-            
-            <div className="flex gap-2" style={{ marginTop: editingId ? '1.8rem' : '0' }}>
+          <div className="flex items-start">
+            <div className="flex gap-2 w-full">
               <button type="submit" className="btn btn-primary" style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1 }}>
                 {editingId ? <Edit2 size={16} /> : <Plus size={16} />}
                 {editingId ? 'Salvar' : 'Criar Coordenador'}
