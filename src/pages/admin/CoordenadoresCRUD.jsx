@@ -12,7 +12,7 @@ export default function CoordenadoresCRUD() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [selectedCourses, setSelectedCourses] = useState([]);
-  const [novoCurso, setNovoCurso] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -43,7 +43,7 @@ export default function CoordenadoresCRUD() {
     setEmail('');
     setSenha('');
     setSelectedCourses([]);
-    setNovoCurso('');
+    setSearchTerm('');
   };
 
   const showMsg = (text, type = 'success') => {
@@ -64,22 +64,11 @@ export default function CoordenadoresCRUD() {
     if (!nome || !email || (!editingId && !senha)) return;
     
     try {
-      let finalCourseIds = [...selectedCourses];
-
-      // Se houver um novo curso digitado, cria ele primeiro
-      if (novoCurso.trim()) {
-        const cursoCriado = await createCurso({ 
-          nome: novoCurso.trim(), 
-          cargaHorariaTotal: 300 // Valor padrão inicial
-        });
-        finalCourseIds.push(cursoCriado.id);
-      }
-
       if (editingId) {
-        await updateCoordenador(editingId, { nome, email, courses: finalCourseIds });
+        await updateCoordenador(editingId, { nome, email, courses: selectedCourses });
         showMsg('Coordenador atualizado com sucesso!');
       } else {
-        await createCoordenador({ nome, email, senha, courses: finalCourseIds });
+        await createCoordenador({ nome, email, senha, courses: selectedCourses });
         showMsg('Coordenador criado com sucesso!');
       }
       resetForm();
@@ -95,7 +84,7 @@ export default function CoordenadoresCRUD() {
     setEmail(coord.email);
     setSenha(''); // Não editamos senha por aqui
     setSelectedCourses(coord.courses || []);
-    setNovoCurso('');
+    setSearchTerm('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -110,6 +99,10 @@ export default function CoordenadoresCRUD() {
       }
     }
   };
+
+  const filteredCursos = cursos.filter(c => 
+    c.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
@@ -134,12 +127,13 @@ export default function CoordenadoresCRUD() {
       <div className="card mb-6">
         <h3 className="mb-4">{editingId ? 'Editar Coordenador' : 'Novo Coordenador'}</h3>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="flex gap-4 flex-wrap items-end">
-            <div className="form-group" style={{ flex: '1 1 200px' }}>
+          {/* Row 1: Dados e Botão */}
+          <div className="flex gap-4 items-end flex-wrap">
+            <div className="form-group" style={{ flex: '2 1 300px' }}>
               <label>Nome Completo</label>
               <input required type="text" className="form-control" value={nome} onChange={(e) => setNome(e.target.value)} />
             </div>
-            <div className="form-group" style={{ flex: '1 1 200px' }}>
+            <div className="form-group" style={{ flex: '1.5 1 250px' }}>
               <label>E-mail</label>
               <input required type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
@@ -149,62 +143,79 @@ export default function CoordenadoresCRUD() {
                 <input required type="password" className="form-control" value={senha} onChange={(e) => setSenha(e.target.value)} />
               </div>
             )}
-            <div className="form-group" style={{ flex: '1 1 200px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                Novo Curso <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>(Opcional)</span>
-                <Sparkles size={14} className="text-warning" />
-              </label>
-              <input 
-                type="text" 
-                className="form-control" 
-                placeholder="Ex: Enfermagem" 
-                value={novoCurso} 
-                onChange={(e) => setNovoCurso(e.target.value)} 
-              />
-            </div>
-            <div className="flex gap-3" style={{ marginBottom: '1rem' }}>
-              <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', height: '42px', alignSelf: 'flex-end' }}>
+            <div className="form-group">
+              <button type="submit" className="btn btn-primary" style={{ height: '46px', padding: '0 2rem' }}>
                 {editingId ? <Edit2 size={18} /> : <Plus size={18} />}
                 {editingId ? 'Salvar' : 'Criar Coordenador'}
               </button>
-              {editingId && (
-                <button type="button" className="btn" onClick={resetForm} style={{ backgroundColor: 'var(--border)', height: '42px', alignSelf: 'flex-end' }}>
+            </div>
+            {editingId && (
+              <div className="form-group">
+                <button type="button" className="btn" onClick={resetForm} style={{ backgroundColor: 'var(--border)', height: '46px' }}>
                   Cancelar
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
-          <div className="form-group">
-            <label className="mb-2 block">Cursos Responsáveis (Selecione os existentes abaixo)</label>
+          {/* Row 2: Seleção de Cursos (Barra) */}
+          <div className="form-group" style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+            <div className="flex justify-between items-center mb-3">
+              <label className="m-0 font-bold">Cursos Responsáveis</label>
+              <span className="text-muted" style={{ fontSize: '0.8rem' }}>
+                {selectedCourses.length} curso(s) selecionado(s)
+              </span>
+            </div>
+            
+            {/* Search Bar */}
+            <div className="mb-3">
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="Pesquisar curso para vincular..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ fontSize: '0.9rem', padding: '0.6rem 1rem' }}
+              />
+            </div>
+
+            {/* Courses Bar (Pills Container) */}
             <div className="flex gap-2 flex-wrap" style={{ 
-              background: 'var(--bg-light)', 
-              padding: '0.75rem', 
+              background: '#f9fafb', 
+              padding: '1rem', 
               borderRadius: '8px',
-              border: '1px solid var(--border)',
-              minHeight: '50px'
+              border: '1px dotted var(--border)',
+              maxHeight: '150px',
+              overflowY: 'auto'
             }}>
-              {cursos.map(curso => (
+              {filteredCursos.map(curso => (
                 <button
                   key={curso.id}
                   type="button"
                   onClick={() => toggleCourse(curso.id)}
                   style={{
-                    padding: '0.4rem 0.8rem',
-                    borderRadius: '16px',
+                    padding: '0.4rem 1rem',
+                    borderRadius: '20px',
                     border: '1px solid',
-                    borderColor: selectedCourses.includes(curso.id) ? 'var(--primary)' : 'var(--border)',
+                    borderColor: selectedCourses.includes(curso.id) ? 'var(--primary)' : '#d1d5db',
                     backgroundColor: selectedCourses.includes(curso.id) ? 'var(--primary)' : 'white',
-                    color: selectedCourses.includes(curso.id) ? 'white' : 'var(--text-main)',
+                    color: selectedCourses.includes(curso.id) ? 'white' : '#4b5563',
                     cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    transition: 'all 0.2s'
+                    fontSize: '0.75rem',
+                    fontWeight: '500',
+                    transition: 'all 0.15s ease-in-out',
+                    boxShadow: selectedCourses.includes(curso.id) ? '0 2px 4px rgba(79, 70, 229, 0.2)' : 'none'
                   }}
                 >
+                  {selectedCourses.includes(curso.id) && <CheckCircle size={12} style={{ marginRight: '4px', display: 'inline-block' }} />}
                   {curso.nome}
                 </button>
               ))}
-              {cursos.length === 0 && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Nenhum curso cadastrado ainda.</p>}
+              {filteredCursos.length === 0 && (
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', width: '100%', textAlign: 'center', margin: '0.5rem 0' }}>
+                  Nenhum curso encontrado para "{searchTerm}".
+                </p>
+              )}
             </div>
           </div>
         </form>
