@@ -69,8 +69,8 @@ export default function CoordinatorLayout() {
         <h2><CheckCircle size={24} /> Coordenador</h2>
         
         {cursos.length > 0 && (
-          <div style={{ padding: '0 1rem 1rem 1rem' }}>
-            <label style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', display: 'block', marginBottom: '0.5rem' }}>CURSO ATIVO</label>
+          <div style={{ padding: '0 1rem 1.5rem 1rem', borderBottom: '1px solid var(--border)', marginBottom: '1rem' }}>
+            <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Curso Ativo</label>
             <div style={{ position: 'relative' }}>
               <select 
                 value={activeCourseId} 
@@ -79,22 +79,23 @@ export default function CoordinatorLayout() {
                   width: '100%', 
                   padding: '0.6rem 2rem 0.6rem 0.75rem', 
                   borderRadius: '6px', 
-                  border: '1px solid rgba(255,255,255,0.2)', 
-                  background: 'rgba(255,255,255,0.1)', 
-                  color: 'white', 
+                  border: '1px solid var(--border)', 
+                  background: 'var(--bg-color)', 
+                  color: 'var(--text-main)', 
                   appearance: 'none',
                   cursor: 'pointer',
-                  fontSize: '0.875rem'
+                  fontSize: '0.8rem',
+                  fontWeight: '500'
                 }}
               >
                 {cursos.length > 1 && (
-                  <option value="all" style={{ color: '#333', fontWeight: 'bold' }}>Todos os Cursos</option>
+                  <option value="all" style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>Todos os Cursos</option>
                 )}
                 {cursos.map(c => (
-                  <option key={c.id} value={c.id} style={{ color: '#333' }}>{c.nome}</option>
+                  <option key={c.id} value={c.id} style={{ color: 'var(--text-main)' }}>{c.nome}</option>
                 ))}
               </select>
-              <ChevronDown size={14} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.6 }} />
+              <ChevronDown size={14} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-muted)' }} />
             </div>
           </div>
         )}
