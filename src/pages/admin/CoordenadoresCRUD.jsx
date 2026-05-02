@@ -12,7 +12,6 @@ export default function CoordenadoresCRUD() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [selectedCourses, setSelectedCourses] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -43,7 +42,6 @@ export default function CoordenadoresCRUD() {
     setEmail('');
     setSenha('');
     setSelectedCourses([]);
-    setSearchTerm('');
   };
 
   const showMsg = (text, type = 'success') => {
@@ -84,7 +82,6 @@ export default function CoordenadoresCRUD() {
     setEmail(coord.email);
     setSenha(''); // Não editamos senha por aqui
     setSelectedCourses(coord.courses || []);
-    setSearchTerm('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -100,9 +97,6 @@ export default function CoordenadoresCRUD() {
     }
   };
 
-  const filteredCursos = cursos.filter(c => 
-    c.nome.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div>
@@ -126,99 +120,105 @@ export default function CoordenadoresCRUD() {
 
       <div className="card mb-6">
         <h3 className="mb-4">{editingId ? 'Editar Coordenador' : 'Novo Coordenador'}</h3>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          {/* Row 1: Dados e Botão */}
-          <div className="flex gap-4 items-end flex-wrap">
-            <div className="form-group" style={{ flex: '2 1 300px' }}>
-              <label>Nome Completo</label>
-              <input required type="text" className="form-control" value={nome} onChange={(e) => setNome(e.target.value)} />
-            </div>
-            <div className="form-group" style={{ flex: '1.5 1 250px' }}>
-              <label>E-mail</label>
-              <input required type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            {!editingId && (
-              <div className="form-group" style={{ flex: '1 1 150px' }}>
-                <label>Senha</label>
-                <input required type="password" className="form-control" value={senha} onChange={(e) => setSenha(e.target.value)} />
-              </div>
-            )}
-            <div className="form-group">
-              <button type="submit" className="btn btn-primary" style={{ height: '46px', padding: '0 2rem' }}>
-                {editingId ? <Edit2 size={18} /> : <Plus size={18} />}
-                {editingId ? 'Salvar' : 'Criar Coordenador'}
-              </button>
-            </div>
-            {editingId && (
-              <div className="form-group">
-                <button type="button" className="btn" onClick={resetForm} style={{ backgroundColor: 'var(--border)', height: '46px' }}>
-                  Cancelar
-                </button>
-              </div>
-            )}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" style={{ maxWidth: '600px' }}>
+          <div className="form-group">
+            <label>Nome Completo</label>
+            <input required type="text" className="form-control" value={nome} onChange={(e) => setNome(e.target.value)} />
+          </div>
+          
+          <div className="form-group">
+            <label>E-mail</label>
+            <input required type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
 
-          {/* Row 2: Seleção de Cursos (Barra) */}
-          <div className="form-group" style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
-            <div className="flex justify-between items-center mb-3">
-              <label className="m-0 font-bold">Cursos Responsáveis</label>
-              <span className="text-muted" style={{ fontSize: '0.8rem' }}>
-                {selectedCourses.length} curso(s) selecionado(s)
-              </span>
+          {!editingId && (
+            <div className="form-group">
+              <label>Senha</label>
+              <input required type="password" className="form-control" value={senha} onChange={(e) => setSenha(e.target.value)} />
             </div>
-            
-            {/* Search Bar */}
-            <div className="mb-3">
-              <input 
-                type="text" 
-                className="form-control" 
-                placeholder="Pesquisar curso para vincular..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ fontSize: '0.9rem', padding: '0.6rem 1rem' }}
-              />
-            </div>
+          )}
 
-            {/* Courses Bar (Pills Container) */}
-            <div className="flex gap-2 flex-wrap" style={{ 
-              background: '#f9fafb', 
-              padding: '1rem', 
-              borderRadius: '8px',
-              border: '1px dotted var(--border)',
-              maxHeight: '150px',
-              overflowY: 'auto'
-            }}>
-              {filteredCursos.map(curso => (
-                <button
-                  key={curso.id}
-                  type="button"
-                  onClick={() => toggleCourse(curso.id)}
-                  style={{
-                    padding: '0.4rem 1rem',
-                    borderRadius: '20px',
-                    border: '1px solid',
-                    borderColor: selectedCourses.includes(curso.id) ? 'var(--primary)' : '#d1d5db',
-                    backgroundColor: selectedCourses.includes(curso.id) ? 'var(--primary)' : 'white',
-                    color: selectedCourses.includes(curso.id) ? 'white' : '#4b5563',
-                    cursor: 'pointer',
-                    fontSize: '0.75rem',
-                    fontWeight: '500',
-                    transition: 'all 0.15s ease-in-out',
-                    boxShadow: selectedCourses.includes(curso.id) ? '0 2px 4px rgba(79, 70, 229, 0.2)' : 'none'
-                  }}
-                >
-                  {selectedCourses.includes(curso.id) && <CheckCircle size={12} style={{ marginRight: '4px', display: 'inline-block' }} />}
-                  {curso.nome}
-                </button>
-              ))}
-              {filteredCursos.length === 0 && (
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', width: '100%', textAlign: 'center', margin: '0.5rem 0' }}>
-                  Nenhum curso encontrado para "{searchTerm}".
-                </p>
+          {/* Seleção de Cursos Estilizada */}
+          <div className="form-group">
+            <label>Curso Vinculado</label>
+            <select 
+              className="form-control" 
+              style={{ 
+                borderColor: 'var(--primary)', 
+                boxShadow: '0 0 0 1px var(--primary)',
+                cursor: 'pointer'
+              }}
+              value=""
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val && !selectedCourses.includes(val)) {
+                  toggleCourse(val);
+                }
+              }}
+            >
+              <option value="">Selecione um curso...</option>
+              {cursos.length > 0 && (
+                <option value="all" disabled>Todos os Cursos (Apenas Filtro)</option>
               )}
+              {cursos.map(c => (
+                <option key={c.id} value={c.id}>{c.nome}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Tags de Cursos Selecionados */}
+          {selectedCourses.length > 0 && (
+            <div className="flex gap-2 flex-wrap mb-2">
+              {selectedCourses.map(cId => {
+                const curso = cursos.find(c => c.id === cId);
+                return (
+                  <span key={cId} style={{ 
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.85rem', 
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)', 
+                    color: 'var(--primary)', 
+                    padding: '4px 12px', 
+                    borderRadius: '20px',
+                    border: '1px solid rgba(79, 70, 229, 0.2)',
+                    fontWeight: '500'
+                  }}>
+                    {curso ? curso.nome : '...'}
+                    <button 
+                      type="button" 
+                      onClick={() => toggleCourse(cId)}
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        padding: 0, 
+                        cursor: 'pointer', 
+                        color: 'var(--primary)',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </span>
+                );
+              })}
             </div>
+          )}
+
+          <div className="flex gap-3 mt-2">
+            <button type="submit" className="btn btn-primary" style={{ padding: '0.75rem 2.5rem' }}>
+              {editingId ? <Edit2 size={18} /> : <Plus size={18} />}
+              {editingId ? 'Salvar Alterações' : 'Criar Coordenador'}
+            </button>
+            {editingId && (
+              <button type="button" className="btn" onClick={resetForm} style={{ backgroundColor: 'var(--border)' }}>
+                Cancelar
+              </button>
+            )}
           </div>
         </form>
+
       </div>
 
       <div className="card">
