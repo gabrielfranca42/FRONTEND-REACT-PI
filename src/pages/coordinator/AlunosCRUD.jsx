@@ -12,7 +12,14 @@ export default function AlunosCRUD() {
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
-    const activeCourseId = localStorage.getItem('activeCourseId');
+    let activeCourseId = localStorage.getItem('activeCourseId');
+    const user = getLoggedUser();
+
+    if (!activeCourseId && user?.courses?.length > 0) {
+      activeCourseId = String(user.courses[0]);
+      localStorage.setItem('activeCourseId', activeCourseId);
+    }
+
     if (!activeCourseId) {
       setLoading(false);
       return;
@@ -28,7 +35,7 @@ export default function AlunosCRUD() {
       setAlunos(alunosData);
       
       // Filtrar o curso atual para exibir no formulário
-      const cursoAtual = cursosData.find(c => c.id === activeCourseId);
+      const cursoAtual = cursosData.find(c => String(c.id) === String(activeCourseId));
       if (cursoAtual) {
         setCursos([cursoAtual]);
         setCursoId(activeCourseId);

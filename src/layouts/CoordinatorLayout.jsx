@@ -14,13 +14,17 @@ export default function CoordinatorLayout() {
       const user = getLoggedUser();
       const allCursos = await getCursos();
       // Filtrar apenas os cursos do coordenador
-      const myCursos = allCursos.filter(c => user.courses.includes(c.id));
+      const myCursos = allCursos.filter(c => {
+        const userCourseIds = user.courses.map(id => String(id));
+        return userCourseIds.includes(String(c.id));
+      });
       setCursos(myCursos);
 
       // Se não houver curso ativo ou o ativo não for meu, pega o primeiro
-      if (!activeCourseId || !user.courses.includes(activeCourseId)) {
+      const userCourseIds = user.courses.map(id => String(id));
+      if (!activeCourseId || !userCourseIds.includes(String(activeCourseId))) {
         if (myCursos.length > 0) {
-          const firstId = myCursos[0].id;
+          const firstId = String(myCursos[0].id);
           setActiveCourseId(firstId);
           localStorage.setItem('activeCourseId', firstId);
         }
