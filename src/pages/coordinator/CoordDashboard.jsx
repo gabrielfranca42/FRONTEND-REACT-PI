@@ -18,23 +18,31 @@ export default function CoordDashboard() {
   const [pieData, setPieData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
-    const activeCourseId = localStorage.getItem('activeCourseId');
-    if (!activeCourseId) return;
+  const [allCursos, setAllCursos] = useState([]);
 
+  const loadData = async () => {
+    const activeCourseId = localStorage.getItem('activeCourseId') || 'all';
+    
     setLoading(true);
     try {
-      // Se for 'all', passamos null ou 'all' dependendo de como o backend/api.js espera
+      const user = JSON.parse(localStorage.getItem('user'));
       const [certData, cursosData, statsData] = await Promise.all([
         getCertificadosPendentes(activeCourseId === 'all' ? null : activeCourseId),
         getCursos(),
-        getCourseStats(activeCourseId) // O backend agora suporta 'all'
+        getCourseStats(activeCourseId)
       ]);
+
+      // Filtrar apenas os cursos do coordenador
+      const myCursos = cursosData.filter(c => {
+        const userCourseIds = (user?.courses || []).map(id => String(id));
+        return userCourseIds.includes(String(c.id));
+      });
+      setAllCursos(myCursos);
 
       if (activeCourseId === 'all') {
         setCursoAtivo({ nome: 'Todos os Cursos' });
       } else {
-        const curso = cursosData.find(c => c.id === activeCourseId);
+        const curso = myCursos.find(c => c.id === activeCourseId);
         setCursoAtivo(curso);
       }
       
@@ -55,14 +63,19 @@ export default function CoordDashboard() {
     } catch (error) {
       console.error("Erro ao carregar dados do dashboard:", error);
     } finally {
-      setLoading(false); // Adicionado para garantir que o loading pare mesmo sem curso
+      setLoading(false);
     }
+  };
+
+  const handleFilterChange = (e) => {
+    const selectedId = e.target.value;
+    localStorage.setItem('activeCourseId', selectedId);
+    loadData();
   };
 
   useEffect(() => {
     loadData();
 
-    // Ouvir mudanças de curso vindas do Layout
     const handleCourseChanged = () => loadData();
     window.addEventListener('courseChanged', handleCourseChanged);
     
@@ -90,7 +103,7 @@ export default function CoordDashboard() {
 
   return (
     <div className="dashboard-container">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold">Painel do Coordenador</h1>
           {cursoAtivo && (
@@ -100,6 +113,23 @@ export default function CoordDashboard() {
             </div>
           )}
         </div>
+
+        {allCursos.length > 1 && (
+          <div className="flex items-center gap-2">
+            <label style={{ fontSize: '0.875rem', fontWeight: '500' }}>Filtrar Dashboard:</label>
+            <select 
+              className="form-control" 
+              style={{ width: 'auto', minWidth: '200px' }}
+              value={localStorage.getItem('activeCourseId') || 'all'}
+              onChange={handleFilterChange}
+            >
+              <option value="all">Todos os Cursos</option>
+              {allCursos.map(c => (
+                <option key={c.id} value={c.id}>{c.nome}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {loading ? (

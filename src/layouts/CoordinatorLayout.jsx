@@ -68,37 +68,6 @@ export default function CoordinatorLayout() {
       <aside className="sidebar">
         <h2><CheckCircle size={24} /> Coordenador</h2>
         
-        {cursos.length > 0 && (
-          <div style={{ padding: '0 1rem 1.5rem 1rem', borderBottom: '1px solid var(--border)', marginBottom: '1rem' }}>
-            <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '0.5rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Curso Ativo</label>
-            <div style={{ position: 'relative' }}>
-              <select 
-                value={activeCourseId} 
-                onChange={handleCourseChange}
-                style={{ 
-                  width: '100%', 
-                  padding: '0.6rem 2rem 0.6rem 0.75rem', 
-                  borderRadius: '6px', 
-                  border: '1px solid var(--border)', 
-                  background: 'var(--bg-color)', 
-                  color: 'var(--text-main)', 
-                  appearance: 'none',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  fontWeight: '500'
-                }}
-              >
-                {cursos.length > 1 && (
-                  <option value="all" style={{ color: 'var(--text-main)', fontWeight: 'bold' }}>Todos os Cursos</option>
-                )}
-                {cursos.map(c => (
-                  <option key={c.id} value={c.id} style={{ color: 'var(--text-main)' }}>{c.nome}</option>
-                ))}
-              </select>
-              <ChevronDown size={14} style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'var(--text-muted)' }} />
-            </div>
-          </div>
-        )}
 
         <nav className="nav-menu" style={{ flex: 1 }}>
           <Link to="/coordinator" className={`nav-item ${isActive('/coordinator')}`}>

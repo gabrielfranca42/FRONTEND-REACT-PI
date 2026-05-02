@@ -165,6 +165,17 @@ export default function AlunosCRUD() {
     }
   };
 
+  const handleCursoChange = (e) => {
+    const selectedId = e.target.value;
+    setCursoId(selectedId);
+    
+    // Se não for "Selecione...", atualiza o curso ativo globalmente e recarrega
+    if (selectedId) {
+      localStorage.setItem('activeCourseId', selectedId);
+      loadData();
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -184,16 +195,24 @@ export default function AlunosCRUD() {
           </div>
           <div className="form-group" style={{ flex: '1 1 250px' }}>
             <label>Curso Vinculado</label>
-            <select required className="form-control" value={cursoId} onChange={(e) => setCursoId(e.target.value)}>
+            <select required className="form-control" value={cursoId} onChange={handleCursoChange}>
               <option value="">Selecione um curso...</option>
+              {cursos.length > 1 && (
+                <option value="all">Todos os Cursos (Apenas Filtro)</option>
+              )}
               {cursos.map(c => (
                 <option key={c.id} value={c.id}>{c.nome}</option>
               ))}
             </select>
           </div>
           <div className="form-group">
-            <button type="submit" className="btn btn-primary" style={{ height: '46px' }}>
-              <Plus size={20} /> Cadastrar
+            <button 
+              type="submit" 
+              className="btn btn-primary" 
+              style={{ height: '46px' }}
+              disabled={cursoId === 'all' || !cursoId}
+            >
+              <Plus size={20} /> {cursoId === 'all' ? 'Selecione um Curso' : 'Cadastrar'}
             </button>
           </div>
         </form>
