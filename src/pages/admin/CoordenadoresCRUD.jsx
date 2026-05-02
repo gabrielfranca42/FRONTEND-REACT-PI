@@ -5,14 +5,14 @@ import { Plus, Edit2, Trash2, XCircle, CheckCircle, Sparkles } from 'lucide-reac
 export default function CoordenadoresCRUD() {
   const [coordenadores, setCoordenadores] = useState([]);
   const [cursos, setCursos] = useState([]);
-  
+
   // Estado do Formulário
   const [editingId, setEditingId] = useState(null);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [selectedCourses, setSelectedCourses] = useState([]);
-  
+
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
 
@@ -50,9 +50,9 @@ export default function CoordenadoresCRUD() {
   };
 
   const toggleCourse = (courseId) => {
-    setSelectedCourses(prev => 
-      prev.includes(courseId) 
-        ? prev.filter(id => id !== courseId) 
+    setSelectedCourses(prev =>
+      prev.includes(courseId)
+        ? prev.filter(id => id !== courseId)
         : [...prev, courseId]
     );
   };
@@ -60,7 +60,7 @@ export default function CoordenadoresCRUD() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!nome || !email || (!editingId && !senha)) return;
-    
+
     try {
       if (editingId) {
         await updateCoordenador(editingId, { nome, email, courses: selectedCourses });
@@ -105,7 +105,7 @@ export default function CoordenadoresCRUD() {
       </div>
 
       {message.text && (
-        <div className={`card mb-4`} style={{ 
+        <div className={`card mb-4`} style={{
           backgroundColor: message.type === 'danger' ? '#fee2e2' : '#dcfce7',
           color: message.type === 'danger' ? '#991b1b' : '#166534',
           padding: '1rem',
@@ -120,31 +120,31 @@ export default function CoordenadoresCRUD() {
 
       <div className="card mb-6">
         <h3 className="mb-4">{editingId ? 'Editar Coordenador' : 'Novo Coordenador'}</h3>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4" style={{ maxWidth: '600px' }}>
-          <div className="form-group">
+        <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3 w-full">
+          <div className="form-group" style={{ flex: '1.5', minWidth: '220px' }}>
             <label>Nome Completo</label>
             <input required type="text" className="form-control" value={nome} onChange={(e) => setNome(e.target.value)} />
           </div>
-          
-          <div className="form-group">
+
+          <div className="form-group" style={{ flex: '1.2', minWidth: '200px' }}>
             <label>E-mail</label>
             <input required type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
 
           {!editingId && (
-            <div className="form-group">
+            <div className="form-group" style={{ flex: '1', minWidth: '150px' }}>
               <label>Senha</label>
               <input required type="password" className="form-control" value={senha} onChange={(e) => setSenha(e.target.value)} />
             </div>
           )}
 
           {/* Seleção de Cursos Estilizada */}
-          <div className="form-group">
+          <div className="form-group" style={{ flex: '1.2', minWidth: '200px' }}>
             <label>Curso Vinculado</label>
-            <select 
-              className="form-control" 
-              style={{ 
-                borderColor: 'var(--primary)', 
+            <select
+              className="form-control"
+              style={{
+                borderColor: 'var(--primary)',
                 boxShadow: '0 0 0 1px var(--primary)',
                 cursor: 'pointer'
               }}
@@ -172,27 +172,27 @@ export default function CoordenadoresCRUD() {
               {selectedCourses.map(cId => {
                 const curso = cursos.find(c => c.id === cId);
                 return (
-                  <span key={cId} style={{ 
+                  <span key={cId} style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    fontSize: '0.85rem', 
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)', 
-                    color: 'var(--primary)', 
-                    padding: '4px 12px', 
+                    fontSize: '0.85rem',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    color: 'var(--primary)',
+                    padding: '4px 12px',
                     borderRadius: '20px',
                     border: '1px solid rgba(79, 70, 229, 0.2)',
                     fontWeight: '500'
                   }}>
                     {curso ? curso.nome : '...'}
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => toggleCourse(cId)}
-                      style={{ 
-                        background: 'none', 
-                        border: 'none', 
-                        padding: 0, 
-                        cursor: 'pointer', 
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: 0,
+                        cursor: 'pointer',
                         color: 'var(--primary)',
                         display: 'flex',
                         alignItems: 'center'
@@ -206,13 +206,13 @@ export default function CoordenadoresCRUD() {
             </div>
           )}
 
-          <div className="flex gap-3 mt-2">
-            <button type="submit" className="btn btn-primary" style={{ padding: '0.75rem 2.5rem' }}>
-              {editingId ? <Edit2 size={18} /> : <Plus size={18} />}
-              {editingId ? 'Salvar Alterações' : 'Criar Coordenador'}
+          <div className="flex gap-2" style={{ marginBottom: '1rem' }}>
+            <button type="submit" className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.9rem', height: '45px' }}>
+              {editingId ? <Edit2 size={16} /> : <Plus size={16} />}
+              {editingId ? 'Salvar' : 'Criar Coordenador'}
             </button>
             {editingId && (
-              <button type="button" className="btn" onClick={resetForm} style={{ backgroundColor: 'var(--border)' }}>
+              <button type="button" className="btn" onClick={resetForm} style={{ backgroundColor: 'var(--border)', padding: '0.6rem 1rem', fontSize: '0.9rem', height: '45px' }}>
                 Cancelar
               </button>
             )}
@@ -250,11 +250,11 @@ export default function CoordenadoresCRUD() {
                             coord.courses.map(cId => {
                               const curso = cursos.find(c => c.id === cId);
                               return (
-                                <span key={cId} style={{ 
-                                  fontSize: '0.75rem', 
-                                  backgroundColor: 'rgba(79, 70, 229, 0.1)', 
-                                  color: 'var(--primary)', 
-                                  padding: '2px 8px', 
+                                <span key={cId} style={{
+                                  fontSize: '0.75rem',
+                                  backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                                  color: 'var(--primary)',
+                                  padding: '2px 8px',
                                   borderRadius: '12px',
                                   border: '1px solid rgba(79, 70, 229, 0.2)'
                                 }}>
@@ -269,16 +269,16 @@ export default function CoordenadoresCRUD() {
                       </td>
                       <td>
                         <div className="flex gap-2 justify-end">
-                          <button 
-                            className="btn btn-secondary" 
+                          <button
+                            className="btn btn-secondary"
                             style={{ padding: '0.4rem', backgroundColor: '#f3f4f6', color: '#374151' }}
                             onClick={() => handleEdit(coord)}
                             title="Editar"
                           >
                             <Edit2 size={16} />
                           </button>
-                          <button 
-                            className="btn btn-danger" 
+                          <button
+                            className="btn btn-danger"
                             style={{ padding: '0.4rem' }}
                             onClick={() => handleDelete(coord.id)}
                             title="Excluir"
