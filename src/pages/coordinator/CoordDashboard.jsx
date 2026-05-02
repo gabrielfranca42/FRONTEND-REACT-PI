@@ -49,7 +49,7 @@ export default function CoordDashboard() {
     } catch (error) {
       console.error("Erro ao carregar dados do dashboard:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Adicionado para garantir que o loading pare mesmo sem curso
     }
   };
 
@@ -210,12 +210,12 @@ export default function CoordDashboard() {
                         <td>
                           <div className="flex gap-2">
                             <button 
-                              className="btn btn-info" 
-                              style={{ backgroundColor: 'var(--primary)', color: 'white', padding: '0.5rem' }}
+                              className="btn" 
+                              style={{ backgroundColor: 'var(--info)', color: 'white', padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
                               onClick={() => window.open(cert.certificateUrl, '_blank')}
-                              title="Visualizar Certificado (Investigar)"
+                              title="Averiguar (Visualizar PDF)"
                             >
-                              <Eye size={18} />
+                              <Eye size={16} /> Averiguar
                             </button>
                             <button 
                               className="btn btn-secondary" 

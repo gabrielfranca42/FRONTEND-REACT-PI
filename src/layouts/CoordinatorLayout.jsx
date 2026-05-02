@@ -13,15 +13,15 @@ export default function CoordinatorLayout() {
     const loadCursos = async () => {
       const user = getLoggedUser();
       const allCursos = await getCursos();
-      // Filtrar apenas os cursos do coordenador
+      // Filtrar apenas os cursos do coordenador (Proteção adicionada para evitar crash se user.courses for null)
       const myCursos = allCursos.filter(c => {
-        const userCourseIds = user.courses.map(id => String(id));
+        const userCourseIds = (user?.courses || []).map(id => String(id));
         return userCourseIds.includes(String(c.id));
       });
       setCursos(myCursos);
 
-      // Se não houver curso ativo ou o ativo não for meu, pega o primeiro
-      const userCourseIds = user.courses.map(id => String(id));
+      // Se não houver curso ativo ou o ativo não for meu, pega o primeiro (Proteção adicionada)
+      const userCourseIds = (user?.courses || []).map(id => String(id));
       if (!activeCourseId || !userCourseIds.includes(String(activeCourseId))) {
         if (myCursos.length > 0) {
           const firstId = String(myCursos[0].id);
@@ -96,6 +96,11 @@ export default function CoordinatorLayout() {
         <button onClick={handleLogout} className="nav-item" style={{ color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1rem', fontSize: 'inherit' }}>
           <LogOut size={20} /> Sair
         </button>
+
+        {/* Indicador de Versão para validar deploy */}
+        <div style={{ marginTop: 'auto', padding: '1rem', fontSize: '0.7rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border)' }}>
+          Versão v1.1.0-fix
+        </div>
       </aside>
       <main className="main-content">
         <Outlet />

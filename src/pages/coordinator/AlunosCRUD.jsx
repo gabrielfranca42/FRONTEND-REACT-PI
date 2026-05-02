@@ -206,7 +206,7 @@ export default function AlunosCRUD() {
               </thead>
               <tbody>
                 {alunos.length === 0 ? (
-                  <tr><td colSpan="3" className="text-center">Nenhum aluno cadastrado.</td></tr>
+                  <tr><td colSpan="4" className="text-center">Nenhum aluno cadastrado.</td></tr>
                 ) : (
                   alunos.map(aluno => {
                     const curso = cursos.find(c => c.id === aluno.cursoId);
@@ -218,28 +218,28 @@ export default function AlunosCRUD() {
                         <td>
                           <div className="flex gap-2">
                             <button 
-                              className="btn btn-secondary" 
-                              style={{ padding: '0.4rem', backgroundColor: 'var(--secondary)', color: 'white' }}
+                              className="btn" 
+                              style={{ padding: '0.4rem 0.6rem', backgroundColor: 'var(--text-muted)', color: 'white', fontSize: '0.75rem' }}
                               onClick={() => openHistory(aluno)}
                               title="Ver Histórico"
                             >
-                              <History size={16} />
+                              <History size={14} /> Histórico
                             </button>
                             <button 
-                              className="btn btn-info" 
-                              style={{ padding: '0.4rem', backgroundColor: 'var(--primary)', color: 'white' }}
+                              className="btn" 
+                              style={{ padding: '0.4rem 0.6rem', backgroundColor: 'var(--primary)', color: 'white', fontSize: '0.75rem' }}
                               onClick={() => openAttach(aluno)}
                               title="Anexar Certificado"
                             >
-                              <FileUp size={16} />
+                              <FileUp size={14} /> Anexar
                             </button>
                             <button 
-                              className="btn btn-danger" 
-                              style={{ padding: '0.4rem', backgroundColor: 'var(--danger)', color: 'white' }}
+                              className="btn" 
+                              style={{ padding: '0.4rem 0.6rem', backgroundColor: 'var(--danger)', color: 'white', fontSize: '0.75rem' }}
                               onClick={() => handleDelete(aluno.id)}
                               title="Remover Aluno"
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={14} /> Remover
                             </button>
                           </div>
                         </td>
