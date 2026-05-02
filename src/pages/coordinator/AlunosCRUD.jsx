@@ -324,7 +324,17 @@ export default function AlunosCRUD() {
               </div>
               <div className="form-group">
                 <label>Categoria</label>
-                <input required type="text" className="form-control" placeholder="Ex: Extensão, Pesquisa..." value={newCert.category} onChange={e => setNewCert({...newCert, category: e.target.value})} />
+                <select 
+                  required 
+                  className="form-control" 
+                  value={newCert.category} 
+                  onChange={e => setNewCert({...newCert, category: e.target.value})}
+                >
+                  <option value="">Selecione uma categoria...</option>
+                  {cursos.find(c => String(c.id) === String(alunoSelecionado?.cursoId))?.regras.map(regra => (
+                    <option key={regra.id} value={regra.categoria}>{regra.categoria}</option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
                 <label>Carga Horária</label>
