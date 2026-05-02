@@ -120,125 +120,97 @@ export default function CoordenadoresCRUD() {
 
       <div className="card mb-6">
         <h3 className="mb-4">{editingId ? 'Editar Coordenador' : 'Novo Coordenador'}</h3>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          {/* Linha 1: Informações Básicas */}
-          <div className="flex flex-wrap gap-4">
-            <div className="form-group" style={{ flex: '2', minWidth: '250px' }}>
+        <form onSubmit={handleSubmit} style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+          gap: '1.5rem',
+          alignItems: 'start'
+        }}>
+          {/* Coluna 1: Nome e Vínculo */}
+          <div className="flex flex-col gap-4">
+            <div className="form-group" style={{ marginBottom: 0 }}>
               <label>Nome Completo</label>
               <input required type="text" className="form-control" value={nome} onChange={(e) => setNome(e.target.value)} />
             </div>
 
-            <div className="form-group" style={{ flex: '1.5', minWidth: '200px' }}>
-              <label>E-mail</label>
-              <input required type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label>Vincular Cursos</label>
+              <select
+                className="form-control"
+                style={{
+                  borderColor: 'var(--primary)',
+                  boxShadow: '0 0 0 1px var(--primary)',
+                  cursor: 'pointer',
+                  backgroundColor: 'white'
+                }}
+                value=""
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val && !selectedCourses.includes(val)) {
+                    toggleCourse(val);
+                  }
+                }}
+              >
+                <option value="">Selecione um curso...</option>
+                {cursos.map(c => (
+                  <option key={c.id} value={c.id}>{c.nome}</option>
+                ))}
+              </select>
             </div>
 
+            {/* Tags abaixo do seletor */}
+            <div className="flex gap-2 flex-wrap" style={{ minHeight: '30px' }}>
+              {selectedCourses.map(cId => {
+                const curso = cursos.find(c => c.id === cId);
+                return (
+                  <span key={cId} style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.75rem',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    color: 'var(--primary)',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid rgba(79, 70, 229, 0.2)',
+                    fontWeight: '500'
+                  }}>
+                    {curso ? curso.nome : '...'}
+                    <button type="button" onClick={() => toggleCourse(cId)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--danger)', display: 'flex' }}>
+                      <Trash2 size={12} />
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Coluna 2: E-mail */}
+          <div className="form-group">
+            <label>E-mail</label>
+            <input required type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+
+          {/* Coluna 3: Senha e Botão */}
+          <div className="flex flex-col gap-4">
             {!editingId && (
-              <div className="form-group" style={{ flex: '1', minWidth: '150px' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
                 <label>Senha</label>
                 <input required type="password" className="form-control" value={senha} onChange={(e) => setSenha(e.target.value)} />
               </div>
             )}
-          </div>
-
-          {/* Linha 2: Seleção de Cursos (Área Destacada) */}
-          <div style={{ 
-            backgroundColor: '#f9fafb', 
-            padding: '1.25rem', 
-            borderRadius: '12px', 
-            border: '1px solid var(--border)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1rem'
-          }}>
-            <div className="flex items-end gap-4 flex-wrap">
-              <div className="form-group" style={{ flex: '1', maxWidth: '400px', marginBottom: 0 }}>
-                <label>Vincular Cursos</label>
-                <select
-                  className="form-control"
-                  style={{
-                    borderColor: 'var(--primary)',
-                    boxShadow: '0 0 0 1px var(--primary)',
-                    cursor: 'pointer',
-                    backgroundColor: 'white'
-                  }}
-                  value=""
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val && !selectedCourses.includes(val)) {
-                      toggleCourse(val);
-                    }
-                  }}
-                >
-                  <option value="">Selecione um curso...</option>
-                  {cursos.map(c => (
-                    <option key={c.id} value={c.id}>{c.nome}</option>
-                  ))}
-                </select>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                Selecione os cursos para este coordenador.
-              </p>
-            </div>
-
-            {/* Tags de Cursos Selecionados */}
-            <div className="flex gap-2 flex-wrap" style={{ minHeight: '30px' }}>
-              {selectedCourses.length > 0 ? (
-                selectedCourses.map(cId => {
-                  const curso = cursos.find(c => c.id === cId);
-                  return (
-                    <span key={cId} style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      fontSize: '0.85rem',
-                      backgroundColor: 'white',
-                      color: 'var(--primary)',
-                      padding: '6px 14px',
-                      borderRadius: '8px',
-                      border: '1px solid var(--primary)',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                      fontWeight: '500'
-                    }}>
-                      {curso ? curso.nome : '...'}
-                      <button
-                        type="button"
-                        onClick={() => toggleCourse(cId)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          padding: 0,
-                          cursor: 'pointer',
-                          color: 'var(--danger)',
-                          display: 'flex',
-                          alignItems: 'center'
-                        }}
-                        title="Remover"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </span>
-                  );
-                })
-              ) : (
-                <span style={{ fontSize: '0.85rem', color: '#9ca3af', fontStyle: 'italic' }}>
-                  Nenhum curso selecionado ainda.
-                </span>
+            
+            <div className="flex gap-2" style={{ marginTop: editingId ? '1.8rem' : '0' }}>
+              <button type="submit" className="btn btn-primary" style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1 }}>
+                {editingId ? <Edit2 size={16} /> : <Plus size={16} />}
+                {editingId ? 'Salvar' : 'Criar Coordenador'}
+              </button>
+              {editingId && (
+                <button type="button" className="btn" onClick={resetForm} style={{ backgroundColor: 'var(--border)', padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+                  Cancelar
+                </button>
               )}
             </div>
-          </div>
-
-          {/* Linha 3: Ações do Formulário */}
-          <div className="flex justify-end gap-3 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
-            {editingId && (
-              <button type="button" className="btn" onClick={resetForm} style={{ backgroundColor: 'var(--border)', color: 'var(--text-main)' }}>
-                Cancelar
-              </button>
-            )}
-            <button type="submit" className="btn btn-primary" style={{ padding: '0.75rem 2rem' }}>
-              {editingId ? <Edit2 size={18} /> : <Plus size={18} />}
-              {editingId ? 'Salvar Alterações' : 'Criar Coordenador'}
-            </button>
           </div>
         </form>
 
