@@ -42,20 +42,26 @@ export default function AlunosCRUD() {
 
     setLoading(true);
     try {
-      const [alunosData, cursosData] = await Promise.all([
-        getAlunos(activeCourseId),
+      const [alunosData, allCursos] = await Promise.all([
+        getAlunos(activeCourseId === 'all' ? null : activeCourseId),
         getCursos()
       ]);
 
       setAlunos(alunosData);
 
-      // Filtrar o curso atual para exibir no formulário
-      const cursoAtual = cursosData.find(c => String(c.id) === String(activeCourseId));
-      if (cursoAtual) {
-        setCursos([cursoAtual]);
+      // Filtrar apenas os cursos do coordenador para o dropdown
+      const myCursos = allCursos.filter(c => {
+        const userCourseIds = (user?.courses || []).map(id => String(id));
+        return userCourseIds.includes(String(c.id));
+      });
+      
+      setCursos(myCursos);
+
+      // Definir curso padrão no formulário
+      if (activeCourseId !== 'all') {
         setCursoId(activeCourseId);
-      } else {
-        setCursos([]);
+      } else if (myCursos.length > 0) {
+        setCursoId(myCursos[0].id); // Primeiro curso como padrão se estiver em "Todos"
       }
     } catch (error) {
       console.error("Erro ao carregar alunos:", error);
@@ -75,13 +81,17 @@ export default function AlunosCRUD() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const activeCourseId = localStorage.getItem('activeCourseId');
-    if (!nome || !matricula || !activeCourseId) return;
+    if (!nome || !matricula || !cursoId) return;
 
-    await createAluno({ nome, matricula, cursoId: activeCourseId });
-    setNome('');
-    setMatricula('');
-    loadData();
+    try {
+      await createAluno({ nome, matricula, cursoId });
+      setNome('');
+      setMatricula('');
+      loadData();
+      alert("Aluno cadastrado com sucesso!");
+    } catch (error) {
+      alert("Erro ao cadastrar aluno: " + (error.response?.data?.error || error.message));
+    }
   };
 
   const handleDelete = async (id) => {

@@ -24,14 +24,20 @@ export default function CoordDashboard() {
 
     setLoading(true);
     try {
+      // Se for 'all', passamos null ou 'all' dependendo de como o backend/api.js espera
       const [certData, cursosData, statsData] = await Promise.all([
-        getCertificadosPendentes(activeCourseId),
+        getCertificadosPendentes(activeCourseId === 'all' ? null : activeCourseId),
         getCursos(),
-        getCourseStats(activeCourseId)
+        getCourseStats(activeCourseId) // O backend agora suporta 'all'
       ]);
 
-      const curso = cursosData.find(c => c.id === activeCourseId);
-      setCursoAtivo(curso);
+      if (activeCourseId === 'all') {
+        setCursoAtivo({ nome: 'Todos os Cursos' });
+      } else {
+        const curso = cursosData.find(c => c.id === activeCourseId);
+        setCursoAtivo(curso);
+      }
+      
       setStats(statsData);
       setPendencias(certData);
 

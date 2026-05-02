@@ -81,6 +81,11 @@ export const getLoggedUser = () => {
   return user ? JSON.parse(user) : null;
 };
 
+export const getProfile = async () => {
+  const { data } = await api.get('/users/me');
+  return data;
+};
+
 // =========================================================================
 // CURSOS (Mapeamento: Frontend PT-BR ↔ Backend EN)
 // =========================================================================

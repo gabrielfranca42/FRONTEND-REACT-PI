@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { FileText, Users, LogOut, CheckCircle, LayoutDashboard, ChevronDown } from 'lucide-react';
-import { logout, getLoggedUser, getCursos } from '../services/api';
+import { logout, getLoggedUser, getCursos, getProfile } from '../services/api';
 
 export default function CoordinatorLayout() {
   const location = useLocation();
@@ -11,7 +11,17 @@ export default function CoordinatorLayout() {
 
   useEffect(() => {
     const loadCursos = async () => {
-      const user = getLoggedUser();
+      let user = getLoggedUser();
+      
+      try {
+        // Tenta atualizar o perfil para garantir que os cursos estão em dia
+        const updatedUser = await getProfile();
+        user = updatedUser;
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } catch (err) {
+        console.warn("Não foi possível atualizar o perfil, usando cache local.");
+      }
+
       const allCursos = await getCursos();
       // Filtrar apenas os cursos do coordenador (Proteção adicionada para evitar crash se user.courses for null)
       const myCursos = allCursos.filter(c => {
@@ -22,7 +32,8 @@ export default function CoordinatorLayout() {
 
       // Se não houver curso ativo ou o ativo não for meu, pega o primeiro (Proteção adicionada)
       const userCourseIds = (user?.courses || []).map(id => String(id));
-      if (!activeCourseId || !userCourseIds.includes(String(activeCourseId))) {
+      const isAllValid = activeCourseId === 'all' && myCursos.length > 1;
+      if (!activeCourseId || (!isAllValid && !userCourseIds.includes(String(activeCourseId)))) {
         if (myCursos.length > 0) {
           const firstId = String(myCursos[0].id);
           setActiveCourseId(firstId);
@@ -76,6 +87,9 @@ export default function CoordinatorLayout() {
                   fontSize: '0.875rem'
                 }}
               >
+                {cursos.length > 1 && (
+                  <option value="all" style={{ color: '#333', fontWeight: 'bold' }}>Todos os Cursos</option>
+                )}
                 {cursos.map(c => (
                   <option key={c.id} value={c.id} style={{ color: '#333' }}>{c.nome}</option>
                 ))}
