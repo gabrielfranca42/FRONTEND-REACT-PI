@@ -12,28 +12,37 @@ export default function AlunosCRUD() {
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
+    const activeCourseId = localStorage.getItem('activeCourseId');
+    if (!activeCourseId) return;
+
     setLoading(true);
     const [alunosData, cursosData] = await Promise.all([
-      getAlunos(),
+      getAlunos(activeCourseId),
       getCursos()
     ]);
     setAlunos(alunosData);
-    setCursos(cursosData);
+    setCursos(cursosData.filter(c => c.id === activeCourseId));
+    setCursoId(activeCourseId); // Pré-seleciona o curso ativo
     setLoading(false);
   };
 
   useEffect(() => {
     loadData();
+
+    const handleCourseChanged = () => loadData();
+    window.addEventListener('courseChanged', handleCourseChanged);
+    
+    return () => window.removeEventListener('courseChanged', handleCourseChanged);
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nome || !matricula || !cursoId) return;
+    const activeCourseId = localStorage.getItem('activeCourseId');
+    if (!nome || !matricula || !activeCourseId) return;
     
-    await createAluno({ nome, matricula, cursoId });
+    await createAluno({ nome, matricula, cursoId: activeCourseId });
     setNome('');
     setMatricula('');
-    setCursoId('');
     loadData();
   };
 

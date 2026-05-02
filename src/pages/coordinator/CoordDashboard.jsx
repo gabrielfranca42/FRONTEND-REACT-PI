@@ -1,55 +1,66 @@
 import { useState, useEffect } from 'react';
-import { getCertificadosPendentes, avaliarCertificado, getCursos, getLoggedUser, getAlunos } from '../../services/api';
-import { Check, X, Users, FileCheck, BookOpen } from 'lucide-react';
+import { getCertificadosPendentes, avaliarCertificado, getCursos, getCourseStats } from '../../services/api';
+import { Check, X, Users, FileCheck, BookOpen, Clock } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 export default function CoordDashboard() {
   const [pendencias, setPendencias] = useState([]);
-  const [cursos, setCursos] = useState([]);
-  const [meusCursos, setMeusCursos] = useState([]);
-  const [totalAlunos, setTotalAlunos] = useState(0);
+  const [cursoAtivo, setCursoAtivo] = useState(null);
+  const [stats, setStats] = useState({
+    totalAlunos: 0,
+    pendentes: 0,
+    aprovadas: 0,
+    rejeitadas: 0,
+    totalHorasAprovadas: 0
+  });
   const [pieData, setPieData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
+    const activeCourseId = localStorage.getItem('activeCourseId');
+    if (!activeCourseId) return;
+
     setLoading(true);
-    const user = getLoggedUser();
-    const myCourseIds = user?.courses || [];
+    try {
+      const [certData, cursosData, statsData] = await Promise.all([
+        getCertificadosPendentes(activeCourseId),
+        getCursos(),
+        getCourseStats(activeCourseId)
+      ]);
 
-    const [certData, cursosData, alunosData] = await Promise.all([
-      getCertificadosPendentes(),
-      getCursos(),
-      getAlunos()
-    ]);
+      const curso = cursosData.find(c => c.id === activeCourseId);
+      setCursoAtivo(curso);
+      setStats(statsData);
+      setPendencias(certData);
 
-    // Filtrar os dados apenas para os cursos do coordenador logado
-    const filteredCursos = cursosData.filter(c => myCourseIds.includes(c.id));
-    const filteredAlunos = alunosData.filter(a => myCourseIds.includes(a.cursoId));
-    const filteredPendencias = certData.filter(cert => myCourseIds.includes(cert.cursoId));
-
-    // Preparar dados para o gráfico de pizza
-    const certsPorCategoria = filteredPendencias.reduce((acc, cert) => {
-      acc[cert.categoria] = (acc[cert.categoria] || 0) + 1;
-      return acc;
-    }, {});
-    
-    const pieDataFormat = Object.keys(certsPorCategoria).map(key => ({
-      name: key,
-      value: certsPorCategoria[key]
-    }));
-
-    setCursos(cursosData);
-    setMeusCursos(filteredCursos);
-    setTotalAlunos(filteredAlunos.length);
-    setPendencias(filteredPendencias);
-    setPieData(pieDataFormat);
-    setLoading(false);
+      // Preparar dados para o gráfico de pizza (baseado nas pendências atuais)
+      const certsPorCategoria = certData.reduce((acc, cert) => {
+        acc[cert.categoria] = (acc[cert.categoria] || 0) + 1;
+        return acc;
+      }, {});
+      
+      const pieDataFormat = Object.keys(certsPorCategoria).map(key => ({
+        name: key,
+        value: certsPorCategoria[key]
+      }));
+      setPieData(pieDataFormat);
+    } catch (error) {
+      console.error("Erro ao carregar dados do dashboard:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     loadData();
+
+    // Ouvir mudanças de curso vindas do Layout
+    const handleCourseChanged = () => loadData();
+    window.addEventListener('courseChanged', handleCourseChanged);
+    
+    return () => window.removeEventListener('courseChanged', handleCourseChanged);
   }, []);
 
   const handleAvaliacao = async (id, aprovado) => {
@@ -63,39 +74,47 @@ export default function CoordDashboard() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1>Painel do Coordenador</h1>
+        <h1>Painel do Coordenador {cursoAtivo && <span style={{ color: 'var(--primary)', fontSize: '1.5rem' }}>| {cursoAtivo.nome}</span>}</h1>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
           <div style={{ backgroundColor: 'var(--primary)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
-            <BookOpen size={32} />
-          </div>
-          <div>
-            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Seus Cursos</h3>
-            <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 'bold' }}>
-              {meusCursos.length > 0 ? meusCursos.map(c => c.nome).join(', ') : 'Nenhum curso vinculado'}
-            </p>
-          </div>
-        </div>
-
-        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
-          <div style={{ backgroundColor: 'var(--accent)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
             <Users size={32} />
           </div>
           <div>
-            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total de Alunos</h3>
-            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{totalAlunos}</p>
+            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Alunos</h3>
+            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.totalAlunos}</p>
           </div>
         </div>
 
         <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
           <div style={{ backgroundColor: 'var(--warning)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
+            <Clock size={32} />
+          </div>
+          <div>
+            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pendentes</h3>
+            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.pendentes}</p>
+          </div>
+        </div>
+
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+          <div style={{ backgroundColor: 'var(--secondary)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
+            <Check size={32} />
+          </div>
+          <div>
+            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aprovadas</h3>
+            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.aprovadas}</p>
+          </div>
+        </div>
+
+        <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}>
+          <div style={{ backgroundColor: 'var(--accent)', color: 'white', padding: '1rem', borderRadius: '8px', display: 'flex' }}>
             <FileCheck size={32} />
           </div>
           <div>
-            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pendências do Curso</h3>
-            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{pendencias.length}</p>
+            <h3 style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Horas</h3>
+            <p style={{ margin: 0, fontSize: '1.75rem', fontWeight: 'bold' }}>{stats.totalHorasAprovadas}h</p>
           </div>
         </div>
       </div>

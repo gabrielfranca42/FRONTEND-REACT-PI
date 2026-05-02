@@ -165,13 +165,12 @@ export const getCoordenadores = async () => {
     id: user._id,
     nome: user.name,
     email: user.email,
-    cursoId: user.courses?.[0] || null
+    courses: user.courses || [] // Retorna todos os cursos
   }));
 };
 
 /**
  * POST /api/v1/users/register → cadastra coordenador
- * Frontend envia: { nome, email, senha, cursoId }
  */
 export const createCoordenador = async (coordenador) => {
   const { data } = await api.post('/users/register', {
@@ -179,14 +178,40 @@ export const createCoordenador = async (coordenador) => {
     email: coordenador.email,
     password: coordenador.senha,
     role: 'COORDINATOR',
-    courses: [coordenador.cursoId]
+    courses: coordenador.courses // Array de IDs
   });
-  return {
-    id: data.user.id,
-    nome: data.user.name,
-    email: data.user.email,
-    cursoId: data.user.courses?.[0] || null
-  };
+  return data.user;
+};
+
+/**
+ * PUT /api/v1/users/:id → atualiza coordenador
+ */
+export const updateCoordenador = async (id, dados) => {
+  const { data } = await api.put(`/users/${id}`, {
+    name: dados.nome,
+    email: dados.email,
+    courses: dados.courses
+  });
+  return data;
+};
+
+/**
+ * DELETE /api/v1/users/:id → remove coordenador
+ */
+export const deleteCoordenador = async (id) => {
+  await api.delete(`/users/${id}`);
+};
+
+// =========================================================================
+// ALUNOS (Users com role STUDENT)
+// =========================================================================
+
+/**
+ * GET /api/v1/courses/:id/stats → estatísticas do curso
+ */
+export const getCourseStats = async (courseId) => {
+  const { data } = await api.get(`/courses/${courseId}/stats`);
+  return data;
 };
 
 // =========================================================================
@@ -196,8 +221,11 @@ export const createCoordenador = async (coordenador) => {
 /**
  * GET /api/v1/users?role=STUDENT → lista alunos
  */
-export const getAlunos = async () => {
-  const { data } = await api.get('/users', { params: { role: 'STUDENT' } });
+export const getAlunos = async (courseId = null) => {
+  const params = { role: 'STUDENT' };
+  if (courseId) params.courseId = courseId;
+  
+  const { data } = await api.get('/users', { params });
   return data.map(user => ({
     id: user._id,
     nome: user.name,
@@ -234,8 +262,11 @@ export const createAluno = async (aluno) => {
 /**
  * GET /api/v1/activities?status=PENDING → certificados pendentes
  */
-export const getCertificadosPendentes = async () => {
-  const { data } = await api.get('/activities', { params: { status: 'PENDING' } });
+export const getCertificadosPendentes = async (courseId = null) => {
+  const params = { status: 'PENDING' };
+  if (courseId) params.courseId = courseId;
+  
+  const { data } = await api.get('/activities', { params });
   return data.map(act => ({
     id: act._id,
     alunoNome: act.student?.name || 'Desconhecido',
