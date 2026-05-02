@@ -255,6 +255,13 @@ export const createAluno = async (aluno) => {
   };
 };
 
+/**
+ * DELETE /api/v1/users/:id → remove aluno
+ */
+export const deleteAluno = async (id) => {
+  await api.delete(`/users/${id}`);
+};
+
 // =========================================================================
 // CERTIFICADOS / ATIVIDADES
 // =========================================================================
@@ -281,8 +288,13 @@ export const getCertificadosPendentes = async (courseId = null) => {
 /**
  * PUT /api/v1/activities/:id/evaluate → aprovar ou reprovar
  */
-export const avaliarCertificado = async (id, aprovado) => {
+/**
+ * PUT /api/v1/activities/:id/evaluate → aprovar, reprovar ou solicitar reenvio
+ * status: 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION'
+ */
+export const avaliarCertificado = async (id, status, feedback = '') => {
   await api.put(`/activities/${id}/evaluate`, {
-    status: aprovado ? 'APPROVED' : 'REJECTED'
+    status,
+    rejectionReason: feedback
   });
 };

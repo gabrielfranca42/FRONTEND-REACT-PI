@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getCertificadosPendentes, avaliarCertificado, getCursos, getCourseStats } from '../../services/api';
-import { Check, X, Users, FileCheck, BookOpen, Clock } from 'lucide-react';
+import { Check, X, Users, FileCheck, BookOpen, Clock, RefreshCcw } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
@@ -63,10 +63,21 @@ export default function CoordDashboard() {
     return () => window.removeEventListener('courseChanged', handleCourseChanged);
   }, []);
 
-  const handleAvaliacao = async (id, aprovado) => {
-    const acao = aprovado ? 'aprovar' : 'reprovar';
-    if (window.confirm(`Tem certeza que deseja ${acao} este certificado?`)) {
-      await avaliarCertificado(id, aprovado);
+  const handleAvaliacao = async (id, status) => {
+    let feedback = '';
+    const acaoMap = {
+      'APPROVED': 'aprovar',
+      'REJECTED': 'reprovar',
+      'NEEDS_REVISION': 'solicitar reenvio para'
+    };
+    
+    if (status !== 'APPROVED') {
+      feedback = window.prompt(`Motivo para ${acaoMap[status]} este certificado:`);
+      if (feedback === null) return; // Cancelou o prompt
+    }
+
+    if (window.confirm(`Tem certeza que deseja ${acaoMap[status]} este certificado?`)) {
+      await avaliarCertificado(id, status, feedback);
       loadData();
     }
   };
@@ -201,15 +212,23 @@ export default function CoordDashboard() {
                             <button 
                               className="btn btn-secondary" 
                               style={{ backgroundColor: 'var(--secondary)', color: 'white', padding: '0.5rem' }}
-                              onClick={() => handleAvaliacao(cert.id, true)}
+                              onClick={() => handleAvaliacao(cert.id, 'APPROVED')}
                               title="Aprovar"
                             >
                               <Check size={18} />
                             </button>
                             <button 
+                              className="btn btn-warning" 
+                              style={{ backgroundColor: 'var(--warning)', color: 'white', padding: '0.5rem' }}
+                              onClick={() => handleAvaliacao(cert.id, 'NEEDS_REVISION')}
+                              title="Solicitar Reenvio"
+                            >
+                              <RefreshCcw size={18} />
+                            </button>
+                            <button 
                               className="btn btn-danger" 
                               style={{ padding: '0.5rem' }}
-                              onClick={() => handleAvaliacao(cert.id, false)}
+                              onClick={() => handleAvaliacao(cert.id, 'REJECTED')}
                               title="Reprovar"
                             >
                               <X size={18} />

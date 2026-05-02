@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getAlunos, createAluno, getCursos, getLoggedUser } from '../../services/api';
-import { Plus } from 'lucide-react';
+import { getAlunos, createAluno, getCursos, getLoggedUser, deleteAluno } from '../../services/api';
+import { Plus, Trash2 } from 'lucide-react';
 
 export default function AlunosCRUD() {
   const [alunos, setAlunos] = useState([]);
@@ -69,6 +69,17 @@ export default function AlunosCRUD() {
     loadData();
   };
 
+  const handleDelete = async (id) => {
+    if (window.confirm('Tem certeza que deseja remover este aluno? Todos os certificados dele também serão afetados.')) {
+      try {
+        await deleteAluno(id);
+        loadData();
+      } catch (error) {
+        alert("Erro ao excluir aluno: " + (error.response?.data?.error || error.message));
+      }
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -115,6 +126,7 @@ export default function AlunosCRUD() {
                   <th>Matrícula</th>
                   <th>Nome do Aluno</th>
                   <th>Curso</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -128,6 +140,16 @@ export default function AlunosCRUD() {
                         <td>{aluno.matricula}</td>
                         <td>{aluno.nome}</td>
                         <td>{curso ? curso.nome : 'Curso não encontrado'}</td>
+                        <td>
+                          <button 
+                            className="btn btn-danger" 
+                            style={{ padding: '0.4rem', backgroundColor: 'var(--danger)', color: 'white' }}
+                            onClick={() => handleDelete(aluno.id)}
+                            title="Remover Aluno"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })
