@@ -267,6 +267,23 @@ export const deleteAluno = async (id) => {
 // =========================================================================
 
 /**
+ * GET /api/v1/activities → lista atividades (filtra por aluno se studentId for passado)
+ */
+export const getAlunosActivities = async (studentId) => {
+  const { data } = await api.get('/activities', { params: { studentId } });
+  return data.map(act => ({
+    id: act._id,
+    alunoNome: act.student?.name || 'Desconhecido',
+    horas: act.hoursClaimed,
+    categoria: act.category,
+    status: act.status.toLowerCase(),
+    descricao: act.title,
+    certificateUrl: act.certificateUrl,
+    data: new Date(act.createdAt).toLocaleDateString('pt-BR')
+  }));
+};
+
+/**
  * GET /api/v1/activities?status=PENDING → certificados pendentes
  */
 export const getCertificadosPendentes = async (courseId = null) => {
@@ -281,7 +298,8 @@ export const getCertificadosPendentes = async (courseId = null) => {
     horas: act.hoursClaimed,
     categoria: act.category,
     status: act.status.toLowerCase(),
-    descricao: act.title
+    descricao: act.title,
+    certificateUrl: act.certificateUrl
   }));
 };
 
@@ -297,4 +315,24 @@ export const avaliarCertificado = async (id, status, feedback = '') => {
     status,
     rejectionReason: feedback
   });
+};
+
+/**
+ * PUT /api/v1/activities/:id/adjust-hours → ajusta horas
+ */
+export const adjustActivityHours = async (id, newHours, reason) => {
+  await api.put(`/activities/${id}/adjust-hours`, {
+    newHours,
+    reason
+  });
+};
+
+/**
+ * POST /api/v1/activities → envia certificado
+ */
+export const submitActivity = async (formData) => {
+  const { data } = await api.post('/activities', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return data;
 };
