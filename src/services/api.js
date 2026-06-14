@@ -7,7 +7,7 @@ import axios from 'axios';
 // CONFIGURAÇÃO BASE DO AXIOS
 // =========================================================================
 const api = axios.create({
-  baseURL: 'https://projeto-senac-geraldo.onrender.com/api/v1',
+  baseURL: 'https://projeto-senac-geraldo-1.onrender.com/api/v1',
   headers: {
     'Content-Type': 'application/json'
   }
