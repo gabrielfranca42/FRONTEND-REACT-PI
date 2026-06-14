@@ -328,7 +328,10 @@ export default function AlunosCRUD() {
                               if (!h.certificateUrl || h.certificateUrl.includes('example.com')) {
                                 alert('Este certificado não possui um arquivo anexo para visualização.');
                               } else {
-                                window.open(h.certificateUrl, '_blank');
+                                const urlCompleta = h.certificateUrl.startsWith('http')
+                                  ? h.certificateUrl
+                                  : `https://projeto-senac-geraldo-1.onrender.com${h.certificateUrl}`;
+                                window.open(urlCompleta, '_blank');
                               }
                             }} title="Ver PDF" style={{ padding: '0.3rem' }}>
                               <Eye size={16} />
