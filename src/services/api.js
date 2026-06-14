@@ -246,7 +246,7 @@ export const getAlunos = async (courseId = null) => {
 export const createAluno = async (aluno) => {
   const { data } = await api.post('/users/register', {
     name: aluno.nome,
-    email: `${aluno.matricula}@aluno.senac.br`, // E-mail gerado a partir da matrícula
+    email: aluno.email, // Usa o e-mail real preenchido pelo coordenador
     password: aluno.matricula, // Senha padrão = matrícula (aluno deve trocar depois)
     role: 'STUDENT',
     matricula: aluno.matricula,

@@ -8,6 +8,7 @@ export default function AlunosCRUD() {
 
   const [nome, setNome] = useState('');
   const [matricula, setMatricula] = useState('');
+  const [email, setEmail] = useState('');
   const [cursoId, setCursoId] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -81,14 +82,15 @@ export default function AlunosCRUD() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nome || !matricula || !cursoId) return;
+    if (!nome || !matricula || !email || !cursoId) return;
 
     try {
-      await createAluno({ nome, matricula, cursoId });
+      await createAluno({ nome, matricula, email, cursoId });
       setNome('');
       setMatricula('');
+      setEmail('');
       loadData();
-      alert("Aluno cadastrado com sucesso!");
+      alert("Aluno cadastrado com sucesso! E-mail enviado.");
     } catch (error) {
       alert("Erro ao cadastrar aluno: " + (error.response?.data?.error || error.message));
     }
@@ -192,6 +194,10 @@ export default function AlunosCRUD() {
           <div className="form-group" style={{ flex: '1 1 150px' }}>
             <label>Matrícula</label>
             <input required type="text" className="form-control" value={matricula} onChange={(e) => setMatricula(e.target.value)} />
+          </div>
+          <div className="form-group" style={{ flex: '1 1 200px' }}>
+            <label>E-mail Pessoal</label>
+            <input required type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
           <div className="form-group" style={{ flex: '1 1 250px' }}>
             <label>Curso Vinculado</label>
