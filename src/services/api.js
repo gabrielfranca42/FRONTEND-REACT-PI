@@ -253,10 +253,10 @@ export const createAluno = async (aluno) => {
     courses: [aluno.cursoId]
   });
   return {
-    id: data.user.id,
-    nome: data.user.name,
-    matricula: data.user.matricula,
-    cursoId: data.user.courses?.[0] || null
+    id: data.id,
+    nome: data.name,
+    matricula: data.matricula,
+    cursoId: data.courses?.[0] || null
   };
 };
 
