@@ -13,7 +13,7 @@ const api = axios.create({
   }
 });
 
-// Interceptor: Injeta o token JWT em todas as requisições autenticadas
+// Interceptor: Injeta o token JWT (JSON Web Token) em todas as requisições que requerem autenticação
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -44,8 +44,8 @@ api.interceptors.response.use(
 // =========================================================================
 
 /**
- * Login — retorna { token, user: { id, name, email, role, courses } }
- * O frontend espera { token, role }
+ * Realiza o login do usuário — retorna o token de acesso e os dados do usuário
+ * O front-end processa o formato do papel (role) para gerenciar o acesso
  */
 export const login = async (email, password) => {
 
@@ -103,7 +103,7 @@ const mapCursoFromBackend = (course) => ({
 });
 
 /**
- * GET /api/v1/courses → lista de cursos
+ * GET /api/v1/courses → obtém a lista de todos os cursos cadastrados
  */
 export const getCursos = async () => {
   const { data } = await api.get('/courses');
@@ -111,8 +111,8 @@ export const getCursos = async () => {
 };
 
 /**
- * POST /api/v1/courses → cria curso
- * Frontend envia: { nome, cargaHorariaTotal }
+ * POST /api/v1/courses → cria um novo curso
+ * O front-end envia: { nome, cargaHorariaTotal }
  */
 export const createCurso = async (curso) => {
   const { data } = await api.post('/courses', {
@@ -162,7 +162,7 @@ export const deleteRegraFromCurso = async (cursoId, regraId) => {
 // =========================================================================
 
 /**
- * GET /api/v1/users?role=COORDINATOR → lista coordenadores
+ * GET /api/v1/users?role=COORDINATOR → lista todos os usuários que são coordenadores
  */
 export const getCoordenadores = async () => {
   const { data } = await api.get('/users', { params: { role: 'COORDINATOR' } });

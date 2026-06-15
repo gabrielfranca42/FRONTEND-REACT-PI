@@ -12,13 +12,13 @@ export default function AlunosCRUD() {
   const [cursoId, setCursoId] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Estados para Modais
+  // Estados para Modais e Exibição de Dados Detalhados
   const [alunoSelecionado, setAlunoSelecionado] = useState(null);
   const [showHistory, setShowHistory] = useState(false);
   const [showAttach, setShowAttach] = useState(false);
   const [historico, setHistorico] = useState([]);
 
-  // Estados para Novo Certificado (Anexo)
+  // Estados para Novo Certificado (Anexo do Coordenador para o Aluno)
   const [newCert, setNewCert] = useState({
     title: '',
     category: '',
@@ -27,10 +27,12 @@ export default function AlunosCRUD() {
   });
   const [uploading, setUploading] = useState(false);
 
+  // Função para carregar os dados iniciais: lista de alunos e cursos disponíveis
   const loadData = async () => {
     let activeCourseId = localStorage.getItem('activeCourseId');
     const user = getLoggedUser();
 
+    // Se não houver curso ativo selecionado no cache e o usuário tiver cursos, defina o primeiro
     if (!activeCourseId && user?.courses?.length > 0) {
       activeCourseId = String(user.courses[0]);
       localStorage.setItem('activeCourseId', activeCourseId);
