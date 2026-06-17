@@ -1,91 +1,182 @@
-# SIGAC — Frontend
+# SIGAC — Web Dashboard (Frontend)
 
-Interface web do Sistema Integrado de Gestão de Atividades Complementares (SIGAC).
+> The administrative and coordination interface for the Integrated Complementary Activities Management System (SIGAC).
 
-## Tecnologias
+---
 
-- **Framework:** React 19
-- **Build Tool:** Vite 8
-- **Roteamento:** React Router DOM 7
-- **HTTP Client:** Axios
-- **Ícones:** Lucide React
-- **Estilização:** CSS puro (Vanilla CSS)
+## 📖 Table of Contents
 
-## Pré-requisitos
+- [Project Purpose](#-project-purpose)
+- [Key Features](#-key-features)
+- [System Design](#-system-design)
+  - [Architecture](#architecture)
+  - [User Flows](#user-flows)
+- [Technology Stack](#-technology-stack)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Environment Setup](#environment-setup)
+- [Deployment](#-deployment)
+- [Related Repositories](#-related-repositories)
+- [License](#-license)
 
-- Node.js 18+
-- Backend rodando em `http://localhost:3000` (ver repositório do backend)
+---
 
-## Instalação
+## 🎯 Project Purpose
+
+As part of the **SIGAC ecosystem**, this web application serves as the central hub for the institutional staff. While students use the mobile app to submit their complementary activities, **coordinators and administrators** use this web dashboard to manage the entire process.
+
+The purpose of this frontend is to provide a clean, fast, and responsive interface for:
+1. **Administrators** to configure the system (create courses, define category rules, and onboard coordinators).
+2. **Course Coordinators** to review student submissions, evaluate certificates (approve/reject/adjust hours), and track the overall progress of the students they oversee.
+
+This system replaces legacy spreadsheet tracking, offering automated progress calculations and a streamlined evaluation workflow.
+
+---
+
+## ✨ Key Features
+
+| Role | Features |
+|---|---|
+| **Administrator** | - **Dashboard:** System-wide metrics and charts.<br>- **Course Management:** Create courses and define graduation rules (categories and hour limits).<br>- **Coordinator Management:** Register and assign coordinators to specific courses. |
+| **Coordinator** | - **Dashboard:** Overview of pending certificates and student progress.<br>- **Student Management:** Register new students, generating automated welcome emails.<br>- **Evaluation Hub:** Review submitted certificates (PDF/Image), approve, reject with feedback, or adjust claimed hours. |
+| **System** | - **PWA Ready:** Installable as a Progressive Web App on desktops and tablets.<br>- **JWT Authentication:** Secure login sessions with automatic token management.<br>- **Responsive Design:** Optimized for desktops, laptops, and tablets. |
+
+---
+
+## 🏗 System Design
+
+### Architecture
+
+The frontend is built as a **Single Page Application (SPA)** using React 19 and Vite. It follows a modular component-based architecture:
+
+- **Routing:** Handled by `react-router-dom` using `HashRouter` (for compatibility with static hosting like GitHub Pages). Routes are protected based on the user's role (Admin vs. Coordinator).
+- **State Management:** Uses React Context and local state hooks (`useState`, `useEffect`). Authentication state is persisted via `localStorage`.
+- **API Communication:** An `axios` instance (`src/services/api.js`) centralizes all backend communication, automatically injecting the JWT `Authorization` header and intercepting `401 Unauthorized` responses to handle auto-logout.
+- **UI/UX:** Built with vanilla CSS (`index.css` and `App.css`) utilizing a custom design system focused on a modern, dark/light aesthetic, complemented by `lucide-react` icons and `recharts` for data visualization.
+
+### User Flows
+
+1. **Login:** User authenticates -> API returns JWT and Role -> Router redirects to `/admin` or `/coordinator` layout.
+2. **Coordinator Flow:** Views pending activities -> Clicks an activity -> Opens modal with certificate preview -> Submits evaluation (Approved/Rejected) -> Backend processes and emails student.
+3. **Admin Flow:** Navigates to Courses -> Creates a new course -> Navigates to Course Rules -> Adds categories (e.g., "Internship: 150h max") -> Assigns a Coordinator.
+
+---
+
+## 🛠 Technology Stack
+
+| Technology | Purpose |
+|---|---|
+| **React 19** | Core UI library |
+| **Vite 8** | Extremely fast build tool and development server |
+| **React Router DOM 7** | Client-side routing and layout management |
+| **Axios** | Promise-based HTTP client for API requests |
+| **Recharts** | Declarative charting library for dashboard metrics |
+| **Lucide React** | Beautiful, consistent icon set |
+| **Vite PWA Plugin** | Progressive Web App manifest and service worker generation |
+| **ESLint** | Code linting and quality enforcement |
+
+---
+
+## 📂 Project Structure
+
+```
+FRONTEND-REACT-PI/
+├── public/                 # Static assets (favicon, PWA icons)
+├── src/
+│   ├── assets/             # Images and logos
+│   ├── layouts/            # Shared layouts with sidebars/navbars
+│   │   ├── AdminLayout.jsx
+│   │   └── CoordinatorLayout.jsx
+│   ├── pages/              # Route components
+│   │   ├── admin/          # Admin CRUDs and Dashboard
+│   │   ├── coordinator/    # Student management and evaluations
+│   │   └── Login.jsx       # Authentication page
+│   ├── services/
+│   │   └── api.js          # Axios configuration and API wrappers
+│   ├── App.jsx             # Router configuration
+│   ├── main.jsx            # React entry point
+│   ├── App.css             # Component-specific styles
+│   └── index.css           # Global design system, tokens, and utilities
+├── vite.config.js          # Vite and PWA configuration
+└── package.json            # Dependencies and scripts
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js** 18+ or 20+
+- The **SIGAC Backend** running locally or remotely (configured in `api.js`)
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/gabrielfranca42/FRONTEND-REACT-PI.git
+cd FRONTEND-REACT-PI
+
+# Install dependencies
 npm install
 ```
 
-## Executar
+### Environment Setup
+
+By default, the application is configured to point to the production backend on Render.
+To point to a local backend for development, update `src/services/api.js`:
+
+```javascript
+// src/services/api.js
+const api = axios.create({
+  // Use this for local development:
+  // baseURL: 'http://localhost:3000/api/v1',
+  
+  // Production URL:
+  baseURL: 'https://projeto-senac-geraldo-1.onrender.com/api/v1',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+```
+
+### Running Locally
 
 ```bash
+# Start the development server with hot-module replacement
 npm run dev
+
+# Build for production
+npm run build
+
+# Preview the production build
+npm run preview
 ```
 
-A aplicação roda em `http://localhost:5173`
+---
 
-## Conexão com o Backend
+## ☁ Deployment
 
-O frontend se conecta ao backend via API REST. A URL base está configurada em `src/services/api.js`:
+The application is configured to be deployed as a static site using **GitHub Pages**.
+The `vite.config.js` includes the `base: '/FRONTEND-REACT-PI/'` property necessary for GitHub Pages sub-path routing.
 
-```
-http://localhost:3000/api/v1
-```
+To deploy manually (if using gh-pages package):
+1. Run `npm run build`
+2. Push the `dist` folder to the `gh-pages` branch.
 
-A autenticação usa JWT (Bearer Token) armazenado no `localStorage`.
+---
 
-## Funcionalidades
+## 📦 Related Repositories
 
-### Painel Administrativo (`/admin`)
-- **Gestão de Cursos** — CRUD completo de cursos
-- **Regras de Cursos** — Adicionar/remover categorias e limites de horas por curso
-- **Gestão de Coordenadores** — Cadastro de coordenadores vinculados a cursos
+| Project | Description |
+|---|---|
+| [PROJETO-SENAC-GERALDO](https://github.com/gabrielfranca42/PROJETO-SENAC-GERALDO) | Node.js Backend API (Core Business Logic) |
+| [REACT-NATIVE-SIGAC](https://github.com/gabrielfranca42/REACT-NATIVE-SIGAC) | Mobile app for students (ValidaUP) |
 
-### Painel do Coordenador (`/coordinator`)
-- **Dashboard de Pendências** — Visualizar e avaliar certificados/atividades pendentes
-- **Gestão de Alunos** — Cadastro de alunos vinculados a cursos
+---
 
-## Estrutura do Projeto
+## 📄 License
 
-```
-src/
-├── layouts/
-│   ├── AdminLayout.jsx         # Layout com sidebar do admin
-│   └── CoordinatorLayout.jsx   # Layout com sidebar do coordenador
-├── pages/
-│   ├── Login.jsx               # Tela de login
-│   ├── admin/
-│   │   ├── CursosCRUD.jsx      # CRUD de cursos
-│   │   ├── RegrasCurso.jsx     # Regras/categorias por curso
-│   │   └── CoordenadoresCRUD.jsx # CRUD de coordenadores
-│   └── coordinator/
-│       ├── CoordDashboard.jsx  # Avaliação de atividades
-│       └── AlunosCRUD.jsx      # CRUD de alunos
-├── services/
-│   └── api.js                  # Chamadas HTTP ao backend (Axios)
-├── App.jsx                     # Rotas da aplicação
-├── App.css
-├── index.css                   # Design system / variáveis CSS
-└── main.jsx                    # Ponto de entrada React
-```
-
-## Rotas
-
-| Rota | Componente | Acesso |
-|---|---|---|
-| `/login` | Login | Público |
-| `/admin/cursos` | CursosCRUD | Admin |
-| `/admin/cursos/:id/regras` | RegrasCurso | Admin |
-| `/admin/coordenadores` | CoordenadoresCRUD | Admin |
-| `/coordinator` | CoordDashboard | Coordenador |
-| `/coordinator/alunos` | AlunosCRUD | Coordenador |
-
-## Backend
-
-O backend Node.js está em um repositório separado: [PROJETO-SENAC-GERALDO](https://github.com/gabrielfranca42/PROJETO-SENAC-GERALDO)
+This project was developed as an academic integrative project (Projeto Integrador) at **SENAC Recife**.
