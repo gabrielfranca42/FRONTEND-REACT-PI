@@ -6,7 +6,7 @@
 
 ## 📖 Table of Contents
 
-- [Project Purpose](#-project-purpose)
+- [Purpose of Existence](#-purpose-of-existence)
 - [Key Features](#-key-features)
 - [System Design](#-system-design)
   - [Architecture](#architecture)
@@ -23,15 +23,29 @@
 
 ---
 
-## 🎯 Project Purpose
+## 🎯 Purpose of Existence
 
-As part of the **SIGAC ecosystem**, this web application serves as the central hub for the institutional staff. While students use the mobile app to submit their complementary activities, **coordinators and administrators** use this web dashboard to manage the entire process.
+### The Problem
 
-The purpose of this frontend is to provide a clean, fast, and responsive interface for:
-1. **Administrators** to configure the system (create courses, define category rules, and onboard coordinators).
-2. **Course Coordinators** to review student submissions, evaluate certificates (approve/reject/adjust hours), and track the overall progress of the students they oversee.
+Managing student complementary activities is traditionally a manual, paper-based process. While the mobile app solves the submission problem for students, institutions still face significant challenges on the administrative side:
 
-This system replaces legacy spreadsheet tracking, offering automated progress calculations and a streamlined evaluation workflow.
+1. **Scattered Data:** Coordinators track student hours across multiple Excel spreadsheets, leading to data loss and inconsistencies.
+2. **Slow Evaluation:** Reviewing paper certificates or disorganized email attachments is time-consuming.
+3. **Lack of Standardization:** Applying complex graduation rules (e.g., maximum hours per category) manually is prone to human error.
+4. **Poor Communication:** Students are left in the dark about their evaluation status, leading to constant inquiries.
+
+### The Solution
+
+The **SIGAC Web Dashboard** is the administrative control center of the ecosystem. It provides coordinators and administrators with a centralized, digital workspace to manage the entire lifecycle of complementary activities:
+
+| Pain Point | How the Web Dashboard Solves It |
+|---|---|
+| Spreadsheet chaos | **Centralized Database:** All student progress and submissions are tracked in a unified system. |
+| Slow evaluation | **Evaluation Hub:** Coordinators can preview certificates and approve/reject them in a few clicks. |
+| Complex rule application | **Automated Tracking:** System automatically enforces course rules and maximum category hours. |
+| Poor communication | **Automated Feedback:** Coordinators can leave feedback on rejected submissions, which instantly updates the student. |
+
+This web frontend ensures that institutional staff can focus on evaluating the quality of activities rather than managing paperwork.
 
 ---
 
